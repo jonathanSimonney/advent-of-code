@@ -1,3 +1,7 @@
+
+# note, if this becomes base for following exercise, take time to refacto, could do my char per char validation a bit
+# better, AND factorised the whole is in interval comp. Should probably raise exception in singular small methods,
+# and except them in the big method to refuse add to set
 def add_field_to_set_if_valid(set_to_fill, field_info):
     field_info_array = field_info.split(":")
     field_name = field_info_array[0]
