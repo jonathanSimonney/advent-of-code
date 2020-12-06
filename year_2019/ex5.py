@@ -2,7 +2,7 @@ from year_2019.intcode_computer import IntcodeComputer
 
 
 def get_input():
-    return 1
+    return 5
 
 
 def handle_output(value):
