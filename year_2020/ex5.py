@@ -24,8 +24,16 @@ def compute_number_from_binary_str(str_to_parse, char_lower, char_upper):
 def parse_seat_info(binary_str):
     dict_to_ret = {"row": compute_number_from_binary_str(binary_str[:7], "F", "B"),
                    "column": compute_number_from_binary_str(binary_str[7:], "L", "R")}
-    dict_to_ret["id"] = dict_to_ret["row"] * 7 + dict_to_ret["column"]
+    dict_to_ret["id"] = dict_to_ret["row"] * 8 + dict_to_ret["column"]
     return dict_to_ret
+
+
+def find_missing_id(ordered_list_seat):
+    next_expected_id = ordered_list_seat[0]["id"]
+    for seat in ordered_list_seat:
+        if seat["id"] != next_expected_id:
+            return next_expected_id
+        next_expected_id = seat["id"] + 1
 
 
 with open("data.txt") as f:
@@ -33,5 +41,8 @@ with open("data.txt") as f:
 # you may also want to remove whitespace characters like `\n` at the end of each line
 content = [parse_seat_info(x.strip()) for x in content]
 
-print(max(content, key=lambda seat_as_dict: seat_as_dict["row"] * 7 + seat_as_dict["column"]))
+content.sort(key=lambda seat_as_dict: seat_as_dict["id"])
+
+# 641 too high
+print(find_missing_id(content))
 
