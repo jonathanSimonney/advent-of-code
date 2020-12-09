@@ -1,3 +1,4 @@
+import itertools
 from year_2019.intcode_computer import IntcodeComputer
 
 
@@ -31,7 +32,7 @@ def compute_phase_settings_result(intcode_computer_to_boot, list_phases):
     return list_output[-1]
 
 
-with open("testData.txt") as f:
+with open("data.txt") as f:
     content = f.readlines()
 
 
@@ -41,4 +42,10 @@ print(content)
 
 intcode_computer = IntcodeComputer(content)
 
-print(compute_phase_settings_result(intcode_computer, [4, 3, 2, 1, 0]))
+possible_settings_list = itertools.permutations(range(5), 5)
+
+list_possible_powers = []
+
+for list_settings in possible_settings_list:
+    list_possible_powers.append(compute_phase_settings_result(intcode_computer, list_settings))
+print(max(list_possible_powers))
