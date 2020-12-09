@@ -16,14 +16,19 @@ def get_first_invalid_number(list_numbers, preamble_len):
 
 
 def get_continuous_set_summing_to_num(list_numbers, num_to_sum_to):
-    candidate_list = []
+    min_index = 0
+    max_index = 0
+    sum_tested = 0
 
-    for num in array_int:
-        for candidate in candidate_list:
-            candidate.append(num)
-            if sum(candidate) == invalid_number:
-                return candidate
-        candidate_list.append([num])
+    for num in list_numbers:
+        max_index += 1
+        sum_tested += num
+
+        while sum_tested > num_to_sum_to:
+            sum_tested -= list_numbers[min_index]
+            min_index += 1
+        if sum_tested == num_to_sum_to:
+            return list_numbers[min_index:max_index]
 
 
 with open("data.txt") as f:
@@ -37,6 +42,5 @@ print(invalid_number)
 
 answer = get_continuous_set_summing_to_num(array_int, invalid_number)
 
-#3514981 too low
 print(min(answer) + max(answer))
 
