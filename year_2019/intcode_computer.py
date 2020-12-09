@@ -10,13 +10,17 @@ class IntcodeComputer:
         self.get_input_instruction = get_input_instruction
         self.send_output_instruction = send_output_instruction
 
-    def run_intcode_program(self, first_instruction=None, second_instruction=None):
+    def run_intcode_program(self, first_instruction=None, second_instruction=None, get_input_instruction=None, send_output_instruction=None):
         self.instruction_pointer = 0
         original_memory = self.memory.copy()
         if first_instruction is not None:
             self.memory[1] = first_instruction
         if second_instruction is not None:
             self.memory[2] = second_instruction
+        if get_input_instruction is not None:
+            self.get_input_instruction = get_input_instruction
+        if send_output_instruction is not None:
+            self.send_output_instruction = send_output_instruction
         while True:
             self._run_intcode_instruction()
             if self.instruction_pointer == -1:
