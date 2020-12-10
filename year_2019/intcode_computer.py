@@ -23,7 +23,7 @@ class IntcodeComputer:
             self.send_output_instruction = send_output_instruction
         while True:
             self._run_intcode_instruction()
-            if self.instruction_pointer == -1:
+            if self.instruction_pointer is None:
                 break
 
         val_to_ret = self.memory[0]
@@ -33,9 +33,8 @@ class IntcodeComputer:
 
     def continue_intcode_program(self):
         while True:
-            print("new instruction executed", self.instruction_pointer)
             self._run_intcode_instruction()
-            if self.instruction_pointer == -1:
+            if self.instruction_pointer is None:
                 break
 
         return self.memory[0]
@@ -47,7 +46,7 @@ class IntcodeComputer:
         params_str = str(opcode_instruction)[:-2]
 
         if opcode == 99:
-            self.instruction_pointer = -1
+            self.instruction_pointer = None
             return
 
         first_param_value = self.memory[self.instruction_pointer + 1]
@@ -85,8 +84,7 @@ class IntcodeComputer:
             first_param = self._get_value_based_on_mode(first_param_value, params_str, 1)
             if first_param != 0:
                 second_param_value = self.memory[self.instruction_pointer + 2]
-                self.memory[self.instruction_pointer] = self._get_value_based_on_mode(second_param_value, params_str, 2)
-                self.instruction_pointer = self.memory[self.instruction_pointer]
+                self.instruction_pointer = self._get_value_based_on_mode(second_param_value, params_str, 2)
                 return
             self.instruction_pointer += 3
             return
@@ -95,8 +93,7 @@ class IntcodeComputer:
             first_param = self._get_value_based_on_mode(first_param_value, params_str, 1)
             if first_param == 0:
                 second_param_value = self.memory[self.instruction_pointer + 2]
-                self.memory[self.instruction_pointer] = self._get_value_based_on_mode(second_param_value, params_str, 2)
-                self.instruction_pointer = self.memory[self.instruction_pointer]
+                self.instruction_pointer = self._get_value_based_on_mode(second_param_value, params_str, 2)
                 return
             self.instruction_pointer += 3
             return

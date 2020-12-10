@@ -7,7 +7,6 @@ def make_a_getter_input(array_inputs_to_send_back):
 
     def method_to_return():
         nonlocal nb_time_method_called
-        print("input called, " + str(nb_time_method_called), array_inputs_to_send_back)
         val_to_return = array_inputs_to_send_back[nb_time_method_called]
         nb_time_method_called += 1
         return val_to_return
@@ -56,24 +55,16 @@ def compute_phase_settings_result_feedback_mode(intcode_computer_program, list_p
     while final_value == 0:
         for index, computer in enumerate(list_computers):
             try:
-                print(index, computer["computer"].memory)
-                print(computer["computer"].instruction_pointer)
-                print(computer)
                 computer["computer"].continue_intcode_program()
                 if index == len(list_computers) - 1:
-                    print(index, list_computers)
                     final_value = computer["output_list"][-1]
             except IndexError:
-                print("ran in indexError")
-                print(index, computer["computer"].memory)
-                print(computer["computer"].instruction_pointer)
-                print(computer)
                 continue
 
     return final_value
 
 
-with open("testData.txt") as f:
+with open("data.txt") as f:
     content = f.readlines()
 
 
@@ -83,12 +74,12 @@ print(content)
 
 intcode_computer = IntcodeComputer(content)
 
-possible_settings_list = itertools.permutations(range(5), 5)
+possible_settings_list = itertools.permutations([9, 8, 7, 6, 5])
 
-print(compute_phase_settings_result_feedback_mode(content, [9, 8, 7, 6, 5]))
+# print(compute_phase_settings_result_feedback_mode(content, [9,8,7,6,5]))
 
-# list_possible_powers = []
-#
-# for list_settings in possible_settings_list:
-#     list_possible_powers.append(compute_phase_settings_result(intcode_computer, list_settings))
-# print(max(list_possible_powers))
+list_possible_powers = []
+
+for list_settings in possible_settings_list:
+    list_possible_powers.append(compute_phase_settings_result_feedback_mode(content, list_settings))
+print(max(list_possible_powers))
