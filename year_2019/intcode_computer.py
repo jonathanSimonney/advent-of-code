@@ -5,12 +5,12 @@ class IntcodeComputer:
     send_output_instruction = None
 
     def __init__(self, memory, get_input_instruction=None, send_output_instruction=None):
-        self.memory = memory
+        self.memory = memory.copy()
         self.instruction_pointer = 0
         self.get_input_instruction = get_input_instruction
         self.send_output_instruction = send_output_instruction
 
-    def run_intcode_program(self, first_instruction=None, second_instruction=None, get_input_instruction=None, send_output_instruction=None):
+    def run_intcode_program_from_start(self, first_instruction=None, second_instruction=None, get_input_instruction=None, send_output_instruction=None):
         self.instruction_pointer = 0
         original_memory = self.memory.copy()
         if first_instruction is not None:
@@ -30,6 +30,15 @@ class IntcodeComputer:
 
         self.memory = original_memory
         return val_to_ret
+
+    def continue_intcode_program(self):
+        while True:
+            print("new instruction executed", self.instruction_pointer)
+            self._run_intcode_instruction()
+            if self.instruction_pointer == -1:
+                break
+
+        return self.memory[0]
 
     def _run_intcode_instruction(self):
         opcode_instruction = self.memory[self.instruction_pointer]

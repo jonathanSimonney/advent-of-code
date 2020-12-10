@@ -19,5 +19,5 @@ content = [int(x) for x in content[0].strip().split(",")]
 
 intcode_computer = IntcodeComputer(content, get_input, handle_output)
 
-intcode_computer.run_intcode_program()
+intcode_computer.run_intcode_program_from_start()
 
