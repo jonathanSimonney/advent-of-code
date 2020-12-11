@@ -1,24 +1,29 @@
 from copy import deepcopy
 
 
-def safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num, col_num):
-    if line_num < 0 or col_num < 0:
-        return False
-    try:
-        return matrice_seats[line_num][col_num] == "#"
-    except IndexError:
-        return False
+def safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num, col_num, change_to_line_num=0, change_to_col_num=0):
+    while True:
+        line_num += change_to_line_num
+        col_num += change_to_col_num
+        if line_num < 0 or col_num < 0:
+            return False
+        try:
+            if matrice_seats[line_num][col_num] == '.':
+                continue
+            return matrice_seats[line_num][col_num] == "#"
+        except IndexError:
+            return False
 
 
 def count_occupied_seats_around_coordinates(matrice_seats, line_num, col_num):
-    array_seats_occupied = [safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num - 1, col_num - 1)
-        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num - 1, col_num)
-        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num - 1, col_num + 1)
-        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num, col_num - 1)
-        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num, col_num + 1)
-        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num + 1, col_num - 1)
-        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num + 1, col_num)
-        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num + 1, col_num + 1)]
+    array_seats_occupied = [safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num, col_num, -1, -1)
+        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num, col_num, -1)
+        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num, col_num, -1, +1)
+        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num, col_num, 0, -1)
+        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num, col_num, 0, +1)
+        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num, col_num, +1, - 1)
+        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num, col_num, +1)
+        , safe_is_occupied_seat_present_at_coordinates(matrice_seats, line_num, col_num, +1, +1)]
 
     return array_seats_occupied.count(True)
 
@@ -35,7 +40,7 @@ def change_seats_matrice_while_changes_occur(seats_to_change):
                     if seat == 'L' and nb_occupied_seats == 0:
                         has_at_least_one_changes_occured = True
                         seats_to_change[idx_line][idx_col] = '#'
-                    if seat == '#' and nb_occupied_seats >= 4:
+                    if seat == '#' and nb_occupied_seats >= 5:
                         has_at_least_one_changes_occured = True
                         seats_to_change[idx_line][idx_col] = 'L'
 
