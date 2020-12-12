@@ -7,8 +7,6 @@ def move_ship_in_direction(ship_info_param, direction_to_move, value_to_move):
         ship_info_param["x_pos"] += value_to_move
     elif direction_to_move == 'W':
         ship_info_param["x_pos"] -= value_to_move
-    else:
-        print("WHAT DID YOU DO ?")
 
 
 def move_ship_with_instruction(ship_info_param, instruction):
@@ -16,15 +14,12 @@ def move_ship_with_instruction(ship_info_param, instruction):
     instruction_value = int(instruction[1:])
 
     if instruction_action == 'L':
-        ship_info_param["current_facing_index"] = (int(instruction_value / 90) - ship_info_param["current_facing_index"]) % 4
-        # print(f"moved ship left by {instruction_value} degree, ship now facing {tuple_directions[ship_info_param['current_facing_index']]}")
+        ship_info_param["current_facing_index"] = (ship_info_param["current_facing_index"] - int(instruction_value / 90)) % 4
     elif instruction_action == 'R':
         ship_info_param["current_facing_index"] = (int(instruction_value / 90) + ship_info_param["current_facing_index"]) % 4
-        # print(f"moved ship right by {instruction_value} degree, ship now facing {tuple_directions[ship_info_param['current_facing_index']]}")
     elif instruction_action == 'F':
         move_ship_in_direction(ship_info_param, tuple_directions[ship_info_param["current_facing_index"]], instruction_value)
     else:
-        # print(instruction_action)
         move_ship_in_direction(ship_info_param, instruction_action, instruction_value)
 
 
@@ -41,7 +36,3 @@ for instruction_str in list_instruction:
 
 #2179 too high
 print(abs(ship_info["x_pos"]) + abs(ship_info["y_pos"]))
-
-# print(list_instruction)
-# print(ship_info)
-# print(list_instruction[-1])
