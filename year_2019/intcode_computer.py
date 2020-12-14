@@ -1,12 +1,14 @@
 class IntcodeComputer:
-    memory = []
+    memory = {}
     instruction_pointer = 0
+    relative_base = 0
     get_input_instruction = None
     send_output_instruction = None
 
     def __init__(self, memory, get_input_instruction=None, send_output_instruction=None):
         self.memory = memory.copy()
         self.instruction_pointer = 0
+        self.relative_base = 0
         self.get_input_instruction = get_input_instruction
         self.send_output_instruction = send_output_instruction
 
@@ -133,7 +135,9 @@ class IntcodeComputer:
         except IndexError:
             mode = 0
         if mode == 0:
-            return self.memory[param_value]
+            if param_value in self.memory:
+                return self.memory[param_value]
+            return 0
         if mode == 1:
             return param_value
 
