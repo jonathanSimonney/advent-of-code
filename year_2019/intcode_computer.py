@@ -14,6 +14,7 @@ class IntcodeComputer:
 
     def run_intcode_program_from_start(self, first_instruction=None, second_instruction=None, get_input_instruction=None, send_output_instruction=None):
         self.instruction_pointer = 0
+        self.relative_base = 0
         original_memory = self.memory.copy()
         if first_instruction is not None:
             self.memory[1] = first_instruction
@@ -51,29 +52,35 @@ class IntcodeComputer:
             self.instruction_pointer = None
             return
 
-        first_param_value = self.memory[self.instruction_pointer + 1]
+        first_param_value = self._get_value_in_memory_fallback_0(self.instruction_pointer + 1)
 
         if opcode == 1:
-            second_param_value = self.memory[self.instruction_pointer + 2]
-            third_param_value = self.memory[self.instruction_pointer + 3]
-
-            self.memory[third_param_value] = self._get_value_based_on_mode(first_param_value, params_str, 1) \
+            second_param_value = self._get_value_in_memory_fallback_0(self.instruction_pointer + 2)
+            third_param_value = self._get_value_in_memory_fallback_0(self.instruction_pointer + 3)
+            value_to_write = self._get_value_based_on_mode(first_param_value, params_str, 1) \
                                              + self._get_value_based_on_mode(second_param_value, params_str, 2)
+
+            self._write_value_based_on_mode(third_param_value, params_str, 3, value_to_write)
+
             self.instruction_pointer += 4
             return
 
         if opcode == 2:
-            second_param_value = self.memory[self.instruction_pointer + 2]
-            third_param_value = self.memory[self.instruction_pointer + 3]
+            second_param_value = self._get_value_in_memory_fallback_0(self.instruction_pointer + 2)
+            third_param_value = self._get_value_in_memory_fallback_0(self.instruction_pointer + 3)
 
-            self.memory[third_param_value] = self._get_value_based_on_mode(first_param_value, params_str, 1) \
+            value_to_write = self._get_value_based_on_mode(first_param_value, params_str, 1) \
                                              * self._get_value_based_on_mode(second_param_value, params_str, 2)
+
+            self._write_value_based_on_mode(third_param_value, params_str, 3, value_to_write)
+
             self.instruction_pointer += 4
             return
 
         if opcode == 3:
             val_to_store = self.get_input_instruction()
-            self.memory[first_param_value] = val_to_store
+            self._write_value_based_on_mode(first_param_value, params_str, 1, val_to_store)
+
             self.instruction_pointer += 2
             return
 
@@ -85,7 +92,7 @@ class IntcodeComputer:
         if opcode == 5:
             first_param = self._get_value_based_on_mode(first_param_value, params_str, 1)
             if first_param != 0:
-                second_param_value = self.memory[self.instruction_pointer + 2]
+                second_param_value = self._get_value_in_memory_fallback_0(self.instruction_pointer + 2)
                 self.instruction_pointer = self._get_value_based_on_mode(second_param_value, params_str, 2)
                 return
             self.instruction_pointer += 3
@@ -94,40 +101,48 @@ class IntcodeComputer:
         if opcode == 6:
             first_param = self._get_value_based_on_mode(first_param_value, params_str, 1)
             if first_param == 0:
-                second_param_value = self.memory[self.instruction_pointer + 2]
+                second_param_value = self._get_value_in_memory_fallback_0(self.instruction_pointer + 2)
                 self.instruction_pointer = self._get_value_based_on_mode(second_param_value, params_str, 2)
                 return
             self.instruction_pointer += 3
             return
 
         if opcode == 7:
-            second_param_value = self.memory[self.instruction_pointer + 2]
-            third_param_value = self.memory[self.instruction_pointer + 3]
+            second_param_value = self._get_value_in_memory_fallback_0(self.instruction_pointer + 2)
+            third_param_value = self._get_value_in_memory_fallback_0(self.instruction_pointer + 3)
 
             first_param = self._get_value_based_on_mode(first_param_value, params_str, 1)
             second_param = self._get_value_based_on_mode(second_param_value, params_str, 2)
             if first_param < second_param:
-                self.memory[third_param_value] = 1
+                self._write_value_based_on_mode(third_param_value, params_str, 3, 1)
             else:
-                self.memory[third_param_value] = 0
+                self._write_value_based_on_mode(third_param_value, params_str, 3, 0)
             self.instruction_pointer += 4
             return
 
         if opcode == 8:
-            second_param_value = self.memory[self.instruction_pointer + 2]
-            third_param_value = self.memory[self.instruction_pointer + 3]
+            second_param_value = self._get_value_in_memory_fallback_0(self.instruction_pointer + 2)
+            third_param_value = self._get_value_in_memory_fallback_0(self.instruction_pointer + 3)
 
             first_param = self._get_value_based_on_mode(first_param_value, params_str, 1)
             second_param = self._get_value_based_on_mode(second_param_value, params_str, 2)
             if first_param == second_param:
-                self.memory[third_param_value] = 1
+                self._write_value_based_on_mode(third_param_value, params_str, 3, 1)
             else:
-                self.memory[third_param_value] = 0
+                self._write_value_based_on_mode(third_param_value, params_str, 3, 0)
             self.instruction_pointer += 4
             return
 
+        if opcode == 9:
+            self.relative_base += self._get_value_based_on_mode(first_param_value, params_str, 1)
+
         raise AttributeError(
             "the opcode found at index " + str(self.instruction_pointer) + ", " + str(opcode) + " isn't a valid opcode")
+
+    def _get_value_in_memory_fallback_0(self, param_value):
+        if param_value in self.memory:
+            return self.memory[param_value]
+        return 0
 
     def _get_value_based_on_mode(self, param_value, parameters_str, index_param):
         try:
@@ -135,10 +150,24 @@ class IntcodeComputer:
         except IndexError:
             mode = 0
         if mode == 0:
-            if param_value in self.memory:
-                return self.memory[param_value]
-            return 0
+            return self._get_value_in_memory_fallback_0(param_value)
         if mode == 1:
             return param_value
+        if mode == 2:
+            return self._get_value_in_memory_fallback_0(param_value + self.relative_base)
 
         raise AttributeError("unrecognised parameter mode, ", str(mode))
+
+    def _write_value_based_on_mode(self, param_value, parameters_str, index_param, value_to_write):
+        try:
+            mode = int(parameters_str[-index_param])
+        except IndexError:
+            mode = 0
+        if mode == 0:
+            self.memory[param_value] = value_to_write
+        elif mode == 1:
+            raise AttributeError("unrecognised parameter mode, can't write in mode 1", str(mode))
+        elif mode == 2:
+            self.memory[param_value + self.relative_base] = value_to_write
+        else:
+            raise AttributeError("unrecognised parameter mode, ", str(mode))
