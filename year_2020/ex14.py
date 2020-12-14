@@ -23,6 +23,7 @@ def write_value_in_mem_with_mask_v2(adress_to_write, value_memory, mask_to_apply
 
     for idx, value in enumerate(mask_to_apply):
         list_adresses_to_iterate = list_adresses_to_write.copy()
+        # TODO this could be refacto as it's a 3 times copypasta
         if value == "0":
             for address_idx, address in enumerate(list_adresses_to_iterate):
                 list_adresses_to_write[address_idx] += adress_as_36_bits_array[idx]
@@ -31,7 +32,6 @@ def write_value_in_mem_with_mask_v2(adress_to_write, value_memory, mask_to_apply
                 list_adresses_to_write[address_idx] += "1"
         elif value == "X":
             for address_idx, address in enumerate(list_adresses_to_iterate):
-                # print("appending an address")
                 list_adresses_to_write[address_idx] += "0"
                 list_adresses_to_write.append(address + "1")
 
