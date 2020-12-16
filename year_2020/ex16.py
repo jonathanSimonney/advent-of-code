@@ -45,15 +45,12 @@ def get_all_invalid_values_in_ticket(list_values, dict_rule_to_check):
 def find_constraint_valid_for_idx(dict_rule_to_check, list_tickets_to_check_against, idx_to_check):
     list_possibles_rule_name = []
 
-    print("will find constraints")
     for rule_name, rule_array in dict_rule_to_check.items():
         all_tickets_are_ok_with_this_rule = True
         for valid_ticket in list_tickets_to_check_against:
             if not check_validity_against_array_constraints(valid_ticket[idx_to_check], rule_array):
                 all_tickets_are_ok_with_this_rule = False
-                print("will break")
                 break
-        print("broke ?")
         if all_tickets_are_ok_with_this_rule:
             list_possibles_rule_name.append(rule_name)
 
@@ -114,7 +111,6 @@ for i in range(len(own_ticket)):
 dict_unique_found_fields = {}
 set_found_fields = set()
 
-print(order_fields_possibilities)
 while len(dict_unique_found_fields) != len(own_ticket):
     for idx, list_rules_name in order_fields_possibilities.items():
         order_fields_possibilities[idx] = list(filter(lambda x: x not in set_found_fields, list_rules_name))
@@ -124,17 +120,12 @@ while len(dict_unique_found_fields) != len(own_ticket):
 
 order_fields_as_list = []
 
-print(dict_unique_found_fields)
+for i in range(len(own_ticket)):
+    order_fields_as_list.append(dict_unique_found_fields[i][0])
 
-for list_rules_name in dict_unique_found_fields.values():
-    order_fields_as_list.append(list_rules_name[0])
-
-print(order_fields_as_list)
-print(own_ticket)
 answer = 1
 for idx, name_field in enumerate(order_fields_as_list):
     if name_field.split(" ")[0] == "departure":
-        print(name_field)
         answer *= own_ticket[idx]
 
 # 559708174747 too low
