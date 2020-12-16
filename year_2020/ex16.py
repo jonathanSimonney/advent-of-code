@@ -1,6 +1,3 @@
-import itertools
-
-
 # format of dict_where_rule_must_appear will be : {"class": [{"min": 1, "max": 3}, {"min": 5, "max": 7}]}
 def parse_instruction_rule(dict_where_rule_must_appear, str_rule):
     array_infos = str_rule.split(": ")
