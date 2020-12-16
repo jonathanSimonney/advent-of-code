@@ -4,6 +4,7 @@ from numba import njit
 from numba import types
 from numba.typed import Dict
 
+# copied from https://www.reddit.com/r/adventofcode/comments/kdf85p/2020_day_15_solutions/gfzwcjm?utm_source=share&utm_medium=web2x&context=3
 
 nums = np.array([6, 19, 0, 5, 7, 13, 1], dtype=np.int64)
 
