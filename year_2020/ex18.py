@@ -7,7 +7,7 @@ def compute_line_total(line_str):
     list_expressions = line_str.split(" ")
     str_index_pointer = 0
 
-    for idx, group in enumerate(list_expressions):
+    for group in list_expressions:
         if (closing_parenthesis_index is not None and str_index_pointer < closing_parenthesis_index) or \
                 (closing_mult_group_index is not None and str_index_pointer < closing_mult_group_index):
             str_index_pointer += len(group) + 1
