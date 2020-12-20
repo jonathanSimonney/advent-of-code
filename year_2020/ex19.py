@@ -47,9 +47,6 @@ def make_directory_rules_final(dict_to_make_final):
                     set_final_keys.add(key)
 
 
-
-
-
 def add_rule_to_dict(str_rule, dict_to_fill):
     array_rule = str_rule.split(": ")
     key = int(array_rule[0])
@@ -64,6 +61,45 @@ def add_rule_to_dict(str_rule, dict_to_fill):
 
     dict_to_fill[key] = value
 
+
+def is_message_valid_with_v2_rules(message_to_check, dict_rules_finals):
+    set_matchs_42 = dict_rules_finals[42]["must_match"]
+    set_matchs_31 = dict_rules_finals[31]["must_match"]
+    if message_to_check[:8] not in set_matchs_42:
+        return False
+    if message_to_check[8:16] not in set_matchs_42:
+        return False
+    if message_to_check[-8:] not in set_matchs_31:
+        return False
+    str_in_excess_to_compute = message_to_check[16:-8]
+    if str_in_excess_to_compute == "":
+        return True
+    nb_found_42 = 0
+    while True:
+        try:
+            if str_in_excess_to_compute[:8] in set_matchs_42:
+                nb_found_42 += 1
+                str_in_excess_to_compute = str_in_excess_to_compute[8:]
+                if str_in_excess_to_compute == "":
+                    return True
+            else:
+                break
+        except IndexError:
+            # given all match are of same len and no extra is allowed, if len isn't multiple of 8, it CAN'T possibly match
+            return False
+    for _ in range(nb_found_42):
+        try:
+            if str_in_excess_to_compute[:8] in set_matchs_31:
+                str_in_excess_to_compute = str_in_excess_to_compute[8:]
+                if str_in_excess_to_compute == "":
+                    return True
+            else:
+                break
+        except IndexError:
+            # given all match are of same len and no extra is allowed, if len isn't multiple of 8, it CAN'T possibly match
+            return False
+
+    return False
 
 with open("data.txt") as f:
     content = [x.strip() for x in f.readlines()]
@@ -81,14 +117,11 @@ print(list_messages[0])
 
 make_directory_rules_final(dict_rules)
 
-print(dict_rules[42]["must_match"])
-print(dict_rules[31]["must_match"])
-print(dict_rules[8]["must_match"])
-print(dict_rules[11]["must_match"])
+# le remplacement équivaut à "au moins 2 * 42, mais autant de 42 qu'on veut, puis autant de 31 qu'on veut, mais max n_42 - 1 de 31"
 
 acc = 0
 for message in list_messages:
-    if message in dict_rules[0]["must_match"]:
+    if is_message_valid_with_v2_rules(message, dict_rules):
         acc += 1
 
 print(acc)
