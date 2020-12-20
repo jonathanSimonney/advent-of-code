@@ -1,14 +1,3 @@
-# def is_str_valid_with_rule(dict_to_check_against, rule_idx, str_to_check):
-#     rule = dict_to_check_against[rule_idx]
-#     if rule["is_final"]:
-#         if str_to_check[0] == rule["must_match"]:
-#             try:
-#                 return {"is_valid": True, "left_str": str_to_check[1:]}
-#             except IndexError:
-#                 return {"is_valid": True, "left_str": ""}
-#     for list_rules_to_check in rule["must_match"]:
-#         is_current_list_rules_valid = True
-#         for rule_key in list_rules_to_check:
 import itertools
 
 
