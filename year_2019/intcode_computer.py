@@ -1,3 +1,10 @@
+def parse_array_into_dict(array_to_parse):
+    dict_to_return = {}
+    for idx, value in enumerate(array_to_parse):
+        dict_to_return[idx] = value
+    return dict_to_return
+
+
 class IntcodeComputer:
     memory = {}
     instruction_pointer = 0
@@ -5,8 +12,8 @@ class IntcodeComputer:
     get_input_instruction = None
     send_output_instruction = None
 
-    def __init__(self, memory, get_input_instruction=None, send_output_instruction=None):
-        self.memory = memory.copy()
+    def __init__(self, memory_array, get_input_instruction=None, send_output_instruction=None):
+        self.memory = parse_array_into_dict(memory_array)
         self.instruction_pointer = 0
         self.relative_base = 0
         self.get_input_instruction = get_input_instruction
@@ -135,6 +142,8 @@ class IntcodeComputer:
 
         if opcode == 9:
             self.relative_base += self._get_value_based_on_mode(first_param_value, params_str, 1)
+            self.instruction_pointer += 2
+            return
 
         raise AttributeError(
             "the opcode found at index " + str(self.instruction_pointer) + ", " + str(opcode) + " isn't a valid opcode")
