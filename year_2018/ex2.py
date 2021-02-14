@@ -1,17 +1,26 @@
+import collections
+
+
 with open("data.txt") as f:
-    content = [int(i) for i in f.readlines()]
+    content = f.readlines()
 
-set_results_reached = set()
+nb_2_letters = 0
+nb_3_letters = 0
 
-acc = 0
-idx = 0
-while True:
-    acc += content[idx]
-    idx += 1
-    if acc in set_results_reached:
-        print(acc)
-        break
-    set_results_reached.add(acc)
-    if idx == len(content):
-        idx = 0
-print(sum(content))
+for line in content:
+    counter_line = collections.Counter(line)
+
+    should_update_2_letters = False
+    should_update_3_letters = False
+    for count in counter_line.values():
+        if count == 2:
+            should_update_2_letters = True
+        if count == 3:
+            should_update_3_letters = True
+
+    nb_2_letters += int(should_update_2_letters)
+    nb_3_letters += int(should_update_3_letters)
+
+print(nb_2_letters * nb_3_letters)
+
+
