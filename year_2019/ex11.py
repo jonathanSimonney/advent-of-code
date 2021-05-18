@@ -24,6 +24,10 @@ def handle_output(value):
     global robot_direction
     global x_pos
     global y_pos
+    global max_x
+    global max_y
+    global min_x
+    global min_y
 
     if is_painting:
         is_painting = False
@@ -42,12 +46,20 @@ def handle_output(value):
         robot_direction = Direction((robot_direction.value + modifier_direction) % 4)
         if robot_direction == Direction.UP:
             y_pos += 1
+            if y_pos > max_y:
+                max_y = y_pos
         elif robot_direction == Direction.RIGHT:
             x_pos += 1
+            if x_pos > max_x:
+                max_x = x_pos
         elif robot_direction == Direction.DOWN:
             y_pos -= 1
+            if y_pos < min_y:
+                min_y = y_pos
         elif robot_direction == Direction.LEFT:
             x_pos -= 1
+            if x_pos < min_x:
+                min_x = x_pos
 
 
 with open("data.txt") as f:
@@ -60,8 +72,13 @@ print(content)
 
 x_pos = 0
 y_pos = 0
+min_x = 0
+min_y = 0
+max_x = 0
+max_y = 0
+
 robot_direction = Direction.UP
-set_painted_white_panels = set(compute_key_with_coords(x_pos, y_pos))
+set_painted_white_panels = {compute_key_with_coords(x_pos, y_pos)}
 set_painted_black_panels = set()
 is_painting = True
 
@@ -73,5 +90,15 @@ intcode_computer.run_intcode_program_from_start(get_input_instruction=get_input,
 print(len(set_painted_white_panels) + len(set_painted_black_panels))
 
 print(set_painted_white_panels)
-# TODO find lowes x and y in the set, and append this x and this y before drawing ascii art style the pic of the code
-# identification needed.
+
+str_to_print = ''
+for y in range(min_y, max_y + 1):
+    for x in range(min_x, max_x + 1):
+        if compute_key_with_coords(x, y) in set_painted_white_panels:
+            str_to_print += '*'
+        else:
+            str_to_print += ' '
+    str_to_print += '\n'
+
+print(str_to_print)
+#RKURGKGK
