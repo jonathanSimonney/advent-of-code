@@ -1,3 +1,24 @@
+from functools import reduce
+
+
+# copy pasted from https://stackoverflow.com/a/147539/7059810
+def gcd(a, b):
+    """Return greatest common divisor using Euclid's Algorithm."""
+    while b:
+        a, b = b, a % b
+    return a
+
+
+def lcm(a, b):
+    """Return lowest common multiple."""
+    return a * b // gcd(a, b)
+
+
+def lcmm(*args):
+    """Return lcm of args."""
+    return reduce(lcm, args)
+
+
 class System:
     moons = []
     nb_steps = 0
@@ -21,6 +42,18 @@ class System:
     def print_system(self):
         for moon in self.moons:
             moon.print_moon()
+
+    def compute_hash(self):
+        return ''.join([moon.compute_hash() for moon in self.moons])
+
+    def compute_hash_x(self):
+        return ''.join([moon.compute_hash_x() for moon in self.moons])
+
+    def compute_hash_y(self):
+        return ''.join([moon.compute_hash_y() for moon in self.moons])
+
+    def compute_hash_z(self):
+        return ''.join([moon.compute_hash_z() for moon in self.moons])
 
 
 class Moon:
@@ -76,6 +109,19 @@ class Moon:
         print(f"pos=<x= {self.x_pos}, y={self.y_pos}, z= {self.z_pos}>, "
               f"vel=<x=  {self.x_velocity}, y=  {self.y_velocity}, z=  {self.z_velocity}>")
 
+    def compute_hash(self):
+        return f"{self.x_pos}{self.y_pos}{self.z_pos}{self.x_velocity}{self.y_velocity}{self.z_velocity}"
+
+    def compute_hash_x(self):
+        return f"{self.x_pos}{self.x_velocity}"
+
+    def compute_hash_y(self):
+        return f"{self.y_pos}{self.y_velocity}"
+
+    def compute_hash_z(self):
+        return f"{self.z_pos}{self.z_velocity}"
+
+
 # real data
 moon_1 = Moon(3, 15, 8)
 moon_2 = Moon(5, -1, -2)
@@ -95,11 +141,36 @@ moon_4 = Moon(8, 4, -5)
 # moon_4 = Moon(3, 5, -1)
 
 system = System([moon_1, moon_2, moon_3, moon_4])
+set_past_x_state = {system.compute_hash_x()}
+set_past_y_state = {system.compute_hash_y()}
+set_past_z_state = {system.compute_hash_z()}
 
-for i in range(1000):
+x_cycle_length = 0
+y_cycle_length = 0
+z_cycle_length = 0
+
+while True:
     system.apply_step()
+    hash_system_x = system.compute_hash_x()
+    hash_system_y = system.compute_hash_y()
+    hash_system_z = system.compute_hash_z()
+    if hash_system_x in set_past_x_state and x_cycle_length == 0:
+        x_cycle_length = system.nb_steps
+        print(x_cycle_length, "x")
+    if hash_system_y in set_past_y_state and y_cycle_length == 0:
+        y_cycle_length = system.nb_steps
+        print(y_cycle_length, "y")
+    if hash_system_z in set_past_z_state and z_cycle_length == 0:
+        z_cycle_length = system.nb_steps
+        print(z_cycle_length, "z")
+    set_past_x_state.add(hash_system_x)
+    set_past_y_state.add(hash_system_y)
+    set_past_z_state.add(hash_system_z)
+
+    if x_cycle_length != 0 and y_cycle_length != 0 and z_cycle_length != 0:
+        break
 
 # 64610322611 too high
-print(system.compute_system_energy())
-print(system.nb_steps)
-system.print_system()
+# print(system.compute_system_energy())
+print(lcmm(x_cycle_length, y_cycle_length, z_cycle_length))
+# system.print_system()
