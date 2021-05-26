@@ -1,4 +1,3 @@
-import itertools
 from enum import Enum
 
 from year_2019.intcode_computer import IntcodeComputer
