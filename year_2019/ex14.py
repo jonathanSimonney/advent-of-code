@@ -56,16 +56,18 @@ dict_needed_chemicals = collections.defaultdict(lambda:  0)
 print(dict_reactions)
 produce_chemical('FUEL', 1, dict_reactions)
 while list(dict_needed_chemicals.keys()) != ['ORE']:
-    for reactive_name, reactive_amount in copy.deepcopy(dict_needed_chemicals).items():
+    for reactive_name in copy.deepcopy(dict_needed_chemicals).keys():
         if reactive_name != 'ORE':
-            amount_already_produced = min(dict_remaining_chemicals[reactive_name], reactive_amount)
+            # accessing directly to keys avoid producing too much chemical because the same reactive was
+            # ALREADY needed one time more
+            amount_already_produced = min(dict_remaining_chemicals[reactive_name], dict_needed_chemicals[reactive_name])
             dict_needed_chemicals[reactive_name] -= amount_already_produced
             dict_remaining_chemicals[reactive_name] -= amount_already_produced
             if dict_needed_chemicals[reactive_name] != 0:
                 produce_chemical(reactive_name, dict_needed_chemicals[reactive_name], dict_reactions)
+
     dict_needed_chemicals = collections.defaultdict(lambda: 0,
                                                     {k: v for k, v in dict_needed_chemicals.items() if v != 0})
-    print(dict_needed_chemicals, dict_remaining_chemicals)
 
 # problem is we produced some chemicals even though we didn't need them I bet
 # 371216 too low
