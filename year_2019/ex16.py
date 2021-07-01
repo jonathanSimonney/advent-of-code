@@ -1,3 +1,4 @@
+import collections
 from functools import lru_cache
 
 input_str = "59702216318401831752516109671812909117759516365269440231257788008453756734827826476239905226493589" \
@@ -11,20 +12,12 @@ input_str = "5970221631840183175251610967181290911775951636526944023125778800845
 # input_str = "12345678"
 
 
-@lru_cache(maxsize=None)
-def get_mult_pattern_for_num(num: int, max_len: int) -> [float]:
-    pattern_array: [float] = []
-    for _ in range(num + 1):
-        pattern_array.append(0)
-    for _ in range(num + 1):
-        pattern_array.append(1)
-    for _ in range(num + 1):
-        pattern_array.append(0)
-    for _ in range(num + 1):
-        pattern_array.append(-1)
-
-    long_enough_pattern = pattern_array * (int(max_len / 4) + 1)
-    return long_enough_pattern[1:]
+def compute_resulting_num_dict_digit(dict_digit: dict) -> str:
+    acc = 0
+    for digit, multiplier in dict_digit.items():
+        acc += digit * multiplier
+    print(f"acc: {acc}")
+    return str(acc)[-1]
 
 
 def apply_one_phase_on_num(num_to_transform: str) -> str:
@@ -33,24 +26,36 @@ def apply_one_phase_on_num(num_to_transform: str) -> str:
 
     num_to_ret = ""
     for num_rank in range(size_num):
-        mult_pattern = get_mult_pattern_for_num(num_rank, size_num)
-        acc = 0
+        dict_digit = collections.defaultdict(int)
+        is_addition = True
 
-        inner_rank = 0
-        # N ^2 complexity, will probably take forever :grimacing:
-        for num in digit_list:
-            acc += num * mult_pattern[inner_rank]
-            inner_rank += 1
-        num_to_ret += str(acc)[-1]
+        # inner_rank can start as num_rank because we skip all the 0 in the pattern, and we must strip the fist elem of
+        # the pattern list
+        inner_rank = num_rank
+
+        while inner_rank < size_num:
+            next_step_inner_rank = inner_rank + num_rank + 1
+            if is_addition:
+                for digit in digit_list[inner_rank:next_step_inner_rank]:
+                    dict_digit[digit] += 1
+            else:
+                for digit in digit_list[inner_rank:next_step_inner_rank]:
+                    dict_digit[digit] -= 1
+            inner_rank = next_step_inner_rank + num_rank + 1
+            is_addition = not is_addition
+        num_to_ret += compute_resulting_num_dict_digit(dict_digit)
+        print(f"we got one number for the chain, it is {num_to_ret}")
     return num_to_ret
 
 
-next_phase_input = input_str
+next_phase_input = input_str * 10000
 for _ in range(100):
-    # print(f"param: {next_phase_input}")
+    print(f"phase {_} done")
+    print(f"param: {next_phase_input}")
     next_phase_input = apply_one_phase_on_num(next_phase_input)
     # print(next_phase_input)
 
 # 09012683 too low
 # 05350576 too low
-print(next_phase_input)
+offset = int(next_phase_input[:7])
+print(next_phase_input[offset:offset + 8])
