@@ -1,4 +1,6 @@
+import collections
 from enum import Enum
+from typing import TypedDict
 
 from year_2019.intcode_computer import IntcodeComputer
 from dataclasses import dataclass
@@ -6,15 +8,21 @@ from dataclasses import dataclass
 
 class Direction(Enum):
     TOP = 1
-    BOTTOM = 2
-    LEFT = 3
-    RIGHT = 4
+    RIGHT = 2
+    BOTTOM = 3
+    LEFT = 4
 
 
 class TypesPosition(Enum):
     SCAFFOLD = 0
     SPACE = 1
     VACUUM_ROBOT = 2
+
+
+class RobotMove(TypedDict):
+    direction: Direction
+    nb_move: int
+    turned_left: bool
 
 
 @dataclass(frozen=True)
@@ -80,19 +88,27 @@ def get_vacuum_robot_dir(robot_pos: Position, set_scaffold_pos: set[Position], c
     raise RuntimeError("no direction found matching the constraints")
 
 
-def get_all_intersections_on_scaffold(scaffold_pos_set: set[Position], robot_pos: Position) -> list[Position]:
+def get_simple_robot_path(scaffold_pos_set: set[Position], robot_pos: Position) -> list[RobotMove]:
     virtually_walked_scaffold: set[Position] = set()
-    list_intersections: list[Position] = []
+    list_moves: list[RobotMove] = []
 
     def walk_robot_in_dir(from_pos: Position, direction: Direction) -> Position:
+        current_move = {'direction': direction, 'nb_move': 0}
+
         next_pos = from_pos.get_pos_in_direction(direction)
         while next_pos in scaffold_pos_set:
-            if next_pos in virtually_walked_scaffold:
-                list_intersections.append(next_pos)
+            current_move['nb_move'] += 1
             virtually_walked_scaffold.add(next_pos)
             from_pos = next_pos
             next_pos = from_pos.get_pos_in_direction(direction)
 
+        if len(list_moves) == 0:
+            current_move['turned_left'] = True
+        else:
+            prev_move = list_moves[-1]
+            current_move['turned_left'] = \
+                True if (prev_move['direction'].value - current_move['direction'].value) % 4 == 1 else False
+        list_moves.append(current_move)
         return from_pos
 
     vacuum_robot_direction = None
@@ -100,7 +116,7 @@ def get_all_intersections_on_scaffold(scaffold_pos_set: set[Position], robot_pos
         vacuum_robot_direction = get_vacuum_robot_dir(robot_pos, scaffold_pos_set, vacuum_robot_direction)
         robot_pos = walk_robot_in_dir(robot_pos, vacuum_robot_direction)
 
-    return list_intersections
+    return list_moves
 
 
 with open("data.txt") as f:
@@ -134,10 +150,5 @@ for y, line_shuttle in enumerate(shuttle_space_array):
         elif dict_symbols[shuttle_char] == TypesPosition.VACUUM_ROBOT:
             vacuum_robot_init_pos = Position(x, y)
 
-list_intersections = get_all_intersections_on_scaffold(scaffold_pos_set, vacuum_robot_init_pos)
-
-acc = 0
-for intersection in list_intersections:
-    acc += intersection.x * intersection.y
-
-print(acc)
+robot_moves = get_simple_robot_path(scaffold_pos_set, vacuum_robot_init_pos)
+print(','.join([f"{'L' if move['turned_left'] else 'R'},{move['nb_move']}" for move in robot_moves]))
