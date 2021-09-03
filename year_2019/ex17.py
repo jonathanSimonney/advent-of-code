@@ -1,4 +1,4 @@
-import collections
+import copy
 from enum import Enum
 from typing import TypedDict
 
@@ -19,10 +19,23 @@ class TypesPosition(Enum):
     VACUUM_ROBOT = 2
 
 
+class Registry(Enum):
+    A = 0
+    B = 1
+    C = 2
+
+
 class RobotMove(TypedDict):
     direction: Direction
     nb_move: int
     turned_left: bool
+
+
+class ProgramRobot(TypedDict):
+    A: list[str]
+    B: list[str]
+    C: list[str]
+    program: list[Registry]
 
 
 @dataclass(frozen=True)
@@ -119,6 +132,95 @@ def get_simple_robot_path(scaffold_pos_set: set[Position], robot_pos: Position) 
     return list_moves
 
 
+def compute_list_registries(
+        move_list: list[str],
+        program: ProgramRobot = {'A': [], 'B': [], 'C': [], 'program': []},
+        allowed_to_continue_registry: list[str] = ['A', 'B', 'C'],
+        ongoing_registry = None
+) -> [ProgramRobot, bool]:
+    if len(move_list) == 0:
+        return [program, True]
+
+    print(f"new iteration with : ", program)
+    max_list_size = 10
+
+    len_a = len(program['A'])
+    len_b = len(program['B'])
+    len_c = len(program['C'])
+
+    # first, check if we can continue from existing registry
+    if len_a != 0 and move_list[:len_a] == program['A']:
+        current_allowed_to_continue_registry = copy.deepcopy(allowed_to_continue_registry)
+        current_iter_program = copy.deepcopy(program)
+
+        if 'A' in current_allowed_to_continue_registry:
+            current_allowed_to_continue_registry.remove('A')
+        current_iter_program['program'].append(Registry.A)
+
+        new_program = compute_list_registries(move_list[len_a:], current_iter_program, current_allowed_to_continue_registry)
+        if new_program[1]:
+            return new_program
+    if len_b != 0 and move_list[:len_b] == program['B']:
+        current_allowed_to_continue_registry = copy.deepcopy(allowed_to_continue_registry)
+        current_iter_program = copy.deepcopy(program)
+
+        if 'B' in current_allowed_to_continue_registry:
+            current_allowed_to_continue_registry.remove('B')
+        current_iter_program['program'].append(Registry.B)
+
+        new_program = compute_list_registries(move_list[len_b:], current_iter_program, current_allowed_to_continue_registry)
+        if new_program[1]:
+            return new_program
+    if len_c != 0 and move_list[:len_c] == program['C']:
+        current_allowed_to_continue_registry = copy.deepcopy(allowed_to_continue_registry)
+        current_iter_program = copy.deepcopy(program)
+
+        if 'C' in current_allowed_to_continue_registry:
+            current_allowed_to_continue_registry.remove('C')
+        current_iter_program['program'].append(Registry.C)
+
+        new_program = compute_list_registries(move_list[len_c:], current_iter_program, current_allowed_to_continue_registry)
+        if new_program[1]:
+            return new_program
+
+    # then check for any registry where instruction can be added
+    if 'A' in allowed_to_continue_registry and len_a < max_list_size:
+        current_iter_program = copy.deepcopy(program)
+        current_allowed_to_continue_registry = copy.deepcopy(allowed_to_continue_registry)
+
+        current_iter_program['A'].append(move_list[0])
+        if ongoing_registry in current_allowed_to_continue_registry:
+            current_allowed_to_continue_registry.remove(ongoing_registry)
+
+        new_program = compute_list_registries(move_list[1:], current_iter_program, allowed_to_continue_registry, 'A')
+        if new_program[1]:
+            return new_program
+    if 'B' in allowed_to_continue_registry and len_b < max_list_size:
+        current_iter_program = copy.deepcopy(program)
+        current_allowed_to_continue_registry = copy.deepcopy(allowed_to_continue_registry)
+
+        current_iter_program['B'].append(move_list[0])
+        if ongoing_registry in current_allowed_to_continue_registry:
+            current_allowed_to_continue_registry.remove(ongoing_registry)
+
+        new_program = compute_list_registries(move_list[1:], current_iter_program, allowed_to_continue_registry, 'B')
+        if new_program[1]:
+            return new_program
+    if 'C' in allowed_to_continue_registry and len_c < max_list_size:
+        current_iter_program = copy.deepcopy(program)
+        current_allowed_to_continue_registry = copy.deepcopy(allowed_to_continue_registry)
+
+        current_iter_program['C'].append(move_list[0])
+        if ongoing_registry in current_allowed_to_continue_registry:
+            current_allowed_to_continue_registry.remove(ongoing_registry)
+
+        new_program = compute_list_registries(move_list[1:], current_iter_program, allowed_to_continue_registry, 'C')
+        if new_program[1]:
+            return new_program
+
+    return [program, False]
+
+
 with open("data.txt") as f:
     content = f.readlines()
 
@@ -151,4 +253,10 @@ for y, line_shuttle in enumerate(shuttle_space_array):
             vacuum_robot_init_pos = Position(x, y)
 
 robot_moves = get_simple_robot_path(scaffold_pos_set, vacuum_robot_init_pos)
-print(','.join([f"{'L' if move['turned_left'] else 'R'},{move['nb_move']}" for move in robot_moves]))
+str_robot_moves = ','.join([f"{'L' if move['turned_left'] else 'R'},{move['nb_move']}" for move in robot_moves])
+print(str_robot_moves)
+
+list_registries = compute_list_registries(str_robot_moves.split(','))
+
+print(list_registries)
+print(robot_moves[0] == robot_moves[3], robot_moves[0], robot_moves[3])
