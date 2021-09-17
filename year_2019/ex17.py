@@ -332,9 +332,3 @@ waken_robot.run_intcode_program_from_start(
 )
 
 # 495722 too low
-#
-# still need another BAC, no idea WHY my program doesn't compute this...
-# A,B,A,C,B,A,C
-# L,6,L,4,R,12
-# L,6,R,12,R,12,L,8
-# L,6,L,10,L,10,L,6
