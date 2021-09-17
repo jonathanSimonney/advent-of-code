@@ -148,33 +148,12 @@ def compute_robot_program(
     if len(move_list) == 0:
         return [program, True]
 
-    # debug begin
-    print(len(move_list), ongoing_registry)
-    print(program['program'])
-    if ongoing_registry is not None:
-        print(len(program[ongoing_registry]))
-
-    acc = len(move_list)
-    for registry in program['program']:
-        acc += len(program[registry.value])
-
-    if ongoing_registry is not None:
-        acc += len(program[ongoing_registry])
-
-    if acc != 72:
-        print("disconnect occured !")
-        print(acc)
-        print(program)
-        print(len(move_list))
-        raise RuntimeError
-
     dict_registry = {
         'A': Registry.A,
         'B': Registry.B,
         'C': Registry.C,
     }
 
-    # debug end
     max_list_size = 10
 
     len_a = len(program['A'])
@@ -191,7 +170,6 @@ def compute_robot_program(
             current_iter_program['program'].append(dict_registries[ongoing_registry])
         current_iter_program['program'].append(Registry.A)
 
-        print("putting a new A")
         new_program = compute_robot_program(move_list[len_a:], current_iter_program,
                                             current_allowed_to_continue_registry)
         if new_program[1]:
@@ -205,8 +183,6 @@ def compute_robot_program(
             current_iter_program['program'].append(dict_registries[ongoing_registry])
         current_iter_program['program'].append(Registry.B)
 
-        print("putting a new B")
-
         new_program = compute_robot_program(move_list[len_b:], current_iter_program,
                                             current_allowed_to_continue_registry)
         if new_program[1]:
@@ -219,7 +195,6 @@ def compute_robot_program(
             current_allowed_to_continue_registry.remove(ongoing_registry)
             current_iter_program['program'].append(dict_registries[ongoing_registry])
         current_iter_program['program'].append(Registry.C)
-        print("putting a new C")
 
         new_program = compute_robot_program(move_list[len_c:], current_iter_program,
                                             current_allowed_to_continue_registry)
@@ -236,7 +211,6 @@ def compute_robot_program(
             current_allowed_to_continue_registry.remove(ongoing_registry)
             current_iter_program['program'].append(dict_registry[ongoing_registry])
 
-        print("continuing A")
         new_program = compute_robot_program(
             move_list[1:],
             current_iter_program,
@@ -249,14 +223,11 @@ def compute_robot_program(
         current_iter_program = copy.deepcopy(program)
         current_allowed_to_continue_registry = copy.deepcopy(allowed_to_continue_registry)
 
-        # print(current_iter_program, current_iter_program, len(move_list), ongoing_registry)
-
         current_iter_program['B'].append(move_list[0])
         if ongoing_registry in current_allowed_to_continue_registry and ongoing_registry != 'B':
             current_allowed_to_continue_registry.remove(ongoing_registry)
             current_iter_program['program'].append(dict_registry[ongoing_registry])
 
-        print("continuing B")
         new_program = compute_robot_program(
             move_list[1:],
             current_iter_program,
@@ -274,7 +245,6 @@ def compute_robot_program(
             current_allowed_to_continue_registry.remove(ongoing_registry)
             current_iter_program['program'].append(dict_registry[ongoing_registry])
 
-        print("continuing C")
         new_program = compute_robot_program(
             move_list[1:],
             current_iter_program,
@@ -310,7 +280,6 @@ def create_input_function(from_program: ProgramRobot) -> Callable:
     str_input = ''.join(list_ascii_chars)
     list_input = list(str_input)
 
-    print(str_input)
 
     def get_input():
         return ord(list_input.pop(0))
@@ -351,22 +320,18 @@ for y, line_shuttle in enumerate(shuttle_space_array):
 
 robot_moves = get_simple_robot_path(scaffold_pos_set, vacuum_robot_init_pos)
 str_robot_moves = ','.join([f"{'L' if move['turned_left'] else 'R'},{move['nb_move']}" for move in robot_moves])
-print(str_robot_moves)
 
 robot_program = compute_robot_program(str_robot_moves.split(','))
 
-print(robot_program)
 content[0] = 2
 waken_robot = IntcodeComputer(content)
 
-new_ascii_reader = AsciiReader()
 waken_robot.run_intcode_program_from_start(
     get_input_instruction=create_input_function(robot_program[0]),
     send_output_instruction=print
 )
 
 # 495722 too low
-print(new_ascii_reader.get_result_str())
 #
 # still need another BAC, no idea WHY my program doesn't compute this...
 # A,B,A,C,B,A,C
