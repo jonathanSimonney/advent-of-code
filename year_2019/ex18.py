@@ -14,9 +14,8 @@ class Direction(Enum):
 
 
 class TypesPosition(Enum):
-    SCAFFOLD = 0
+    WALL = 0
     SPACE = 1
-    VACUUM_ROBOT = 2
 
 
 @dataclass(frozen=True)
@@ -48,8 +47,27 @@ class Position:
         return Position(self.x, self.y + 1)
 
 
+# objective data struct :
+# {'@': ['a': 12, 'B': 23, ..., 'X': 11],
+#  'a': ['B': 23, ..., 'X': 11],
+#  ...,
+#  'X': ['a': 12, 'B': 23, ..., 'x': 11]
+# }
+def parse_content(current_maze: list[str]):
+    list_empty = []
+    first_pos: Position
+    for y, line in enumerate(current_maze):
+        for x, char in enumerate(line):
+            if char == '@':
+                first_pos = Position(x, y)
+            elif char == '#':
+                dict_pos
+
+
 with open("data.txt") as f:
     content = f.readlines()
+
+parse_content(content)
 
 # you may also want to remove whitespace characters like `\n` at the end of each line
 
