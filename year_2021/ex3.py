@@ -1,6 +1,3 @@
-import collections
-
-
 def recursively_find_rating_in_list(
         list_binary_num: list[str],
         currently_checked_pos: int,
