@@ -51,6 +51,20 @@ def get_winning_board(list_candidates_board: [Board], list_number_to_draw: [str]
                 return board
 
 
+def get_loosing_board(list_candidates_board: [Board], list_number_to_draw: [str]):
+    set_winning_index = set()
+    for nb_drawn in list_number_to_draw:
+        loosing_board = None
+        for idx_board, board in enumerate(list_candidates_board):
+            if idx_board in set_winning_index:
+                continue
+            if board.draw_number(nb_drawn):
+                set_winning_index.add(idx_board)
+                loosing_board = board
+        if len(list_candidates_board) - len(set_winning_index) == 0:
+            return loosing_board
+
+
 with open("data.txt") as f:
     content = f.readlines()
 # you may also want to remove whitespace characters like `\n` at the end of each line
@@ -71,3 +85,5 @@ list_board.append(Board(lines))
 
 # 38550 too low
 print(get_winning_board(list_board, nb_drawns).compute_score())
+# 27936 too high
+print(get_loosing_board(list_board, nb_drawns).compute_score())
