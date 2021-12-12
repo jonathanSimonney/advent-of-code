@@ -11,7 +11,8 @@ def add_line_conn_do_dict(line_to_parse: str, dict_to_fill: dict) -> None:
 def recursively_find_all_valid_path(
         dict_connections: dict,
         starting_path: list[str],
-        set_forbidden_caves: set[str] = None
+        set_forbidden_caves: set[str] = None,
+        has_already_used_double_visit: bool = False
 ) -> list[list[str]]:
 
     if set_forbidden_caves is None:
@@ -26,15 +27,23 @@ def recursively_find_all_valid_path(
 
     acc_list = []
 
-    current_iteration_considered_paths: list[list[str]] = []
-
     for cav_to_visit in dict_connections[start_pos]:
         if cav_to_visit == 'end':
             acc_list.append(starting_path + [cav_to_visit])
         elif cav_to_visit not in set_forbidden_caves:
-            current_iteration_considered_paths.append(starting_path + [cav_to_visit])
-    for current_iter_path in current_iteration_considered_paths:
-        acc_list.extend(recursively_find_all_valid_path(dict_connections, current_iter_path, set_forbidden_caves))
+            acc_list.extend(recursively_find_all_valid_path(
+                dict_connections,
+                starting_path + [cav_to_visit],
+                set_forbidden_caves,
+                has_already_used_double_visit
+            ))
+        elif (cav_to_visit in set_forbidden_caves) and (cav_to_visit != 'start') and (not has_already_used_double_visit):
+            acc_list.extend(recursively_find_all_valid_path(
+                dict_connections,
+                starting_path + [cav_to_visit],
+                set_forbidden_caves,
+                True
+            ))
 
     return acc_list
 
