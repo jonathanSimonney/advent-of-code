@@ -1,4 +1,4 @@
-from common_helpers.position import Position
+from common_helpers.position import Position, print_ascii_with_set_position
 
 
 def fold_along_x_axis(set_point_to_fold: set[Position], x_axis_pos: int):
@@ -10,7 +10,7 @@ def fold_along_x_axis(set_point_to_fold: set[Position], x_axis_pos: int):
 
 
 def fold_along_y_axis(set_point_to_fold: set[Position], y_axis_pos: int):
-    for point in set_point_to_fold:
+    for point in set_point_to_fold.copy():
         if point.y > y_axis_pos:
             new_point_y = y_axis_pos - (point.y - y_axis_pos)
             set_point_to_fold.add(Position(point.x, new_point_y))
@@ -38,8 +38,14 @@ def main():
 
             list_folding.append(line_splitted[-1].split('='))
 
-    fold_along_x_axis(set_point_pos, int(list_folding[0][1]))
+    for folding_instruction in list_folding:
+        if folding_instruction[0] == 'x':
+            fold_along_x_axis(set_point_pos, int(folding_instruction[1]))
+        else:
+            fold_along_y_axis(set_point_pos, int(folding_instruction[1]))
+
     print(len(set_point_pos))
+    print_ascii_with_set_position(set_point_pos)
 
 
 if __name__ == "__main__":
