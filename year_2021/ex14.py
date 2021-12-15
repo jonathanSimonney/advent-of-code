@@ -1,17 +1,16 @@
 import collections
 
 
-def apply_transformations_to_polymer(polymer_str: str, dict_transformations: dict) -> str:
-    new_polymer = ''
+def apply_transformations_to_polymer(
+        dict_transformations: dict,
+        dict_nb_polymers: dict
+) -> dict:
+    new_dict_nb_polymers = collections.defaultdict(lambda: 0)
+    for polymer, nb_polymer in dict_nb_polymers.items():
+        new_dict_nb_polymers[dict_transformations[polymer][0]] += nb_polymer
+        new_dict_nb_polymers[dict_transformations[polymer][1]] += nb_polymer
 
-    old_char = None
-    for char in polymer_str:
-        if old_char is not None:
-            new_polymer += dict_transformations[old_char + char]
-        new_polymer += char
-        old_char = char
-
-    return new_polymer
+    return new_dict_nb_polymers
 
 
 def main():
@@ -25,16 +24,35 @@ def main():
 
     for line in content[2:]:
         splitted_line = line.split(" -> ")
-        dict_transformations[splitted_line[0]] = splitted_line[1]
+        dict_transformations[splitted_line[0]] = [splitted_line[0][0] + splitted_line[1], splitted_line[1] + splitted_line[0][1]]
 
+    dict_nb_polymers = collections.defaultdict(lambda: 0)
+
+    old_char = None
+    for char in current_polymer:
+        if old_char is not None:
+            dict_nb_polymers[old_char + char] += 1
+        old_char = char
+
+    print(dict_nb_polymers)
     for _ in range(40):
-        current_polymer = apply_transformations_to_polymer(current_polymer, dict_transformations)
+        dict_nb_polymers = apply_transformations_to_polymer(dict_transformations, dict_nb_polymers)
 
-    polymer_counter = collections.Counter(current_polymer)
-    print(polymer_counter)
+    polymer_counter: dict = collections.defaultdict(lambda: 0)
+    for polymer_str, nb_polymer in dict_nb_polymers.items():
+        polymer_counter[polymer_str[0]] += nb_polymer
+    polymer_counter[current_polymer[-1]] += 1
     print(max(polymer_counter.values()) - min(polymer_counter.values()))
 
 
 if __name__ == "__main__":
     main()
 
+# bnb
+# bbnbb
+# bn bbnbb nb
+# bbnb b nbbnbbn b bnbb
+
+# hh
+# hcnch
+# hbccnbcbh
