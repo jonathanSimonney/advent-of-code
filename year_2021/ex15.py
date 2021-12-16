@@ -22,11 +22,8 @@ def main():
     # you may also want to remove whitespace characters like `\n` at the end of each line
     content = [line.strip() for line in content]
 
-    set_point_pos: set[Position] = set()
-
     dict_point_risk_level: dict = {}
     dict_point_travel_cost: dict = {}
-
 
     tile_y_length = len(content)
     tile_x_length = len(content[0])
@@ -48,14 +45,24 @@ def main():
             dict_point_travel_cost[Position(x, y)] = sum_risk_levels
 
     dict_point_travel_cost[Position(0, 0)] = 0
-    are_travel_cost_accurate = False
-    while not are_travel_cost_accurate:
-        are_travel_cost_accurate = compute_more_accurate_travel_cost(dict_point_risk_level, dict_point_travel_cost)
+    should_i_continue = True
+    while should_i_continue:
+        should_i_continue = compute_more_accurate_travel_cost(dict_point_risk_level, dict_point_travel_cost)
+        print("another loop ! ", dict_point_travel_cost[Position(max_x, max_y)])
 
-    print(dict_point_travel_cost)
+    # print(dict_point_travel_cost)
 
-    #2864 too low
+    # 2864 too low
+    # 2874 too high
     print(dict_point_travel_cost[Position(max_x, max_y)])
+    # print(dict_point_travel_cost[Position(99, 99)])
+    print(dict_point_travel_cost[Position(max_x - 1, max_y)])
+    print(dict_point_travel_cost[Position(max_x, max_y - 1)])
+
+    print(dict_point_travel_cost[Position(max_x - 1, max_y - 1)])
+    print(dict_point_travel_cost[Position(max_x - 2, max_y)])
+    print(dict_point_travel_cost[Position(max_x, max_y - 2)])
+    print(compute_more_accurate_travel_cost(dict_point_risk_level, dict_point_travel_cost))
 
 
 if __name__ == "__main__":
