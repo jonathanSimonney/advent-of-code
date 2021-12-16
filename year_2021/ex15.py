@@ -27,12 +27,24 @@ def main():
     dict_point_risk_level: dict = {}
     dict_point_travel_cost: dict = {}
 
-    sum_risk_levels = 0
+
+    tile_y_length = len(content)
+    tile_x_length = len(content[0])
 
     for y, line in enumerate(content):
         for x, char in enumerate(line):
-            dict_point_risk_level[Position(x, y)] = int(char)
-            sum_risk_levels += int(char)
+            for y_tile_pos in range(5):
+                for x_tile_pos in range(5):
+                    dict_point_risk_level[
+                        Position(x + x_tile_pos * tile_x_length, y + y_tile_pos * tile_y_length)
+                    ] = (int(char) + x_tile_pos + y_tile_pos) % 9 or 9
+
+    sum_risk_levels = 0
+    max_y = len(content) * 5 - 1
+    max_x = len(content[0]) * 5 - 1
+    for y in range(max_y + 1):
+        for x in range(max_x + 1):
+            sum_risk_levels += dict_point_risk_level[Position(x, y)]
             dict_point_travel_cost[Position(x, y)] = sum_risk_levels
 
     dict_point_travel_cost[Position(0, 0)] = 0
@@ -42,8 +54,7 @@ def main():
 
     print(dict_point_travel_cost)
 
-    max_y = len(content) - 1
-    max_x = len(content[0]) - 1
+    #2864 too low
     print(dict_point_travel_cost[Position(max_x, max_y)])
 
 
