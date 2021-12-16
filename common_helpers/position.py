@@ -43,6 +43,14 @@ class Position:
             self.get_right_pos()
         ]
 
+    def get_all_adjacent_pos_without_diagonal(self):
+        return [
+            self.get_bottom_pos(),
+            self.get_left_pos(),
+            self.get_top_pos(),
+            self.get_right_pos()
+        ]
+
 
 def print_ascii_with_set_position(position_set: set[Position]):
     min_x = 0
