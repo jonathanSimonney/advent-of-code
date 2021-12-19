@@ -135,9 +135,19 @@ def reduce_snailfish_str(str_to_reduce: str) -> str:
     return str_to_reduce
 
 
-with open("data.txt") as f:
+def add_two_snailfish_numbers(nb_1: str, nb_2: str) -> str:
+    return reduce_snailfish_str(f"[{nb_1},{nb_2}]")
+
+
+with open("testData.txt") as f:
     content = f.readlines()
 # you may also want to remove whitespace characters like `\n` at the end of each line
 content = [line.strip() for line in content]
 
-print(reduce_snailfish_str('[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]'))
+snailfish_sum = content[0]
+# print(snailfish_sum)
+for line in content[1:]:
+    snailfish_sum = add_two_snailfish_numbers(snailfish_sum, line)
+    # print(snailfish_sum)
+
+print(snailfish_sum)
