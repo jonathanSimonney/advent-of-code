@@ -47,20 +47,21 @@ def is_y_in_target_area_y_range_during_n_steps(y_velocity: int, nb_steps: dict) 
 
 
 def main():
+    nb_next_invalid_needed_to_stop = 100
     result_highest_y = 0
     for x in range(max_x):
         range_nb_step_for_valid_x = compute_nb_step_to_be_in_target_area_x_range(x)
-        print(range_nb_step_for_valid_x)
         if range_nb_step_for_valid_x['range_valid'] != [-1]:
             tested_y = 0
-            while True:
+            nb_invalid = 0
+            while nb_invalid < nb_next_invalid_needed_to_stop:
                 tested_y += 1
                 if is_y_in_target_area_y_range_during_n_steps(tested_y, range_nb_step_for_valid_x):
-                    print(tested_y)
+                    nb_invalid = 0
                     if tested_y > result_highest_y:
                         result_highest_y = tested_y
                 else:
-                    break
+                    nb_invalid += 1
 
 #2628 too low
     print(result_highest_y * (result_highest_y + 1) / 2)
