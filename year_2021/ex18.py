@@ -1,39 +1,4 @@
 import math
-from statistics import median
-from typing import Union
-
-# class SnailfishNum:
-#     left_num: Union[int, 'SnailfishNum']
-#     right_num: Union[int, 'SnailfishNum']
-#     parent: 'SnailfishNum'
-#     depth: int
-#
-#     def __init__(self, left_num, right_num, parent, depth):
-#         self.left_num = left_num
-#         self.right_num = right_num
-#         self.parent = parent
-#         self.depth = depth
-#
-#     def reduce_while_able(self):
-#         change_occured = True
-#
-#         while change_occured:
-#             self._explode_while_able()
-#             change_occured = self._split_while_able()
-#
-#     def _explode_while_able(self) -> bool:
-#         pass
-#
-#     def _split_while_able(self) -> bool:
-#         pass
-#
-#     def add_snailfish_num(self, other: 'SnailfishNum'):
-#         pass
-#
-#     def compute_magnitude(self):
-#         pass
-#
-#     def _add_to_right_elem(self):
 
 
 def add_num_to_leftmost(ordered_list: list[str], num_to_add: int) -> str:
@@ -170,10 +135,18 @@ with open("data.txt") as f:
 content = [line.strip() for line in content]
 
 snailfish_sum = content[0]
-# print(snailfish_sum)
 for line in content[1:]:
     snailfish_sum = add_two_snailfish_numbers(snailfish_sum, line)
-    # print(snailfish_sum)
 
 print(snailfish_sum)
 print(compute_snailfish_num_magnitude(snailfish_sum))
+
+max_magnitude = 0
+for line in content:
+    for second_line in content:
+        snailfish_sum = add_two_snailfish_numbers(line, second_line)
+        candidate_magnitude = compute_snailfish_num_magnitude(snailfish_sum)
+        if candidate_magnitude > max_magnitude:
+            max_magnitude = candidate_magnitude
+
+print(max_magnitude)
