@@ -139,7 +139,32 @@ def add_two_snailfish_numbers(nb_1: str, nb_2: str) -> str:
     return reduce_snailfish_str(f"[{nb_1},{nb_2}]")
 
 
-with open("testData.txt") as f:
+def compute_snailfish_num_magnitude(snailfish_num: str) -> int:
+    if '[' not in snailfish_num:
+        return int(snailfish_num)
+
+    snailfish_num_1 = ''
+    snailfish_num_2 = ''
+    nb_opened_brackets = 0
+    have_filled_all_num_1 = False
+
+    for char in snailfish_num[1:-1]:
+        if have_filled_all_num_1:
+            snailfish_num_2 += char
+        else:
+            snailfish_num_1 += char
+        if char == '[':
+            nb_opened_brackets += 1
+        elif char == ']':
+            nb_opened_brackets -= 1
+        elif char == ',' and nb_opened_brackets == 0:
+            snailfish_num_1 = ''.join(list(snailfish_num_1)[:-1])
+            have_filled_all_num_1 = True
+
+    return 3*compute_snailfish_num_magnitude(snailfish_num_1) + 2*compute_snailfish_num_magnitude(snailfish_num_2)
+
+
+with open("data.txt") as f:
     content = f.readlines()
 # you may also want to remove whitespace characters like `\n` at the end of each line
 content = [line.strip() for line in content]
@@ -151,3 +176,4 @@ for line in content[1:]:
     # print(snailfish_sum)
 
 print(snailfish_sum)
+print(compute_snailfish_num_magnitude(snailfish_sum))
