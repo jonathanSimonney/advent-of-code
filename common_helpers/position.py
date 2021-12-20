@@ -52,6 +52,22 @@ class Position:
         ]
 
 
+@dataclass(frozen=True)
+class ThreeDPosition:
+    """Class for position on an 3 dimensions board."""
+    x: int
+    y: int
+    z: int
+
+
+def get_position_relative_to_another(pos_reference: ThreeDPosition, other_pos: ThreeDPosition) -> ThreeDPosition:
+    res_pos_x = other_pos.x - pos_reference.x
+    res_pos_y = other_pos.y - pos_reference.y
+    res_pos_z = other_pos.z - pos_reference.z
+
+    return ThreeDPosition(res_pos_x, res_pos_y, res_pos_z)
+
+
 def print_ascii_with_set_position(position_set: set[Position]):
     min_x = 0
     min_y = 0
