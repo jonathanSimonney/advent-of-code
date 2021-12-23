@@ -59,6 +59,15 @@ class ThreeDPosition:
     y: int
     z: int
 
+    def get_point_rotated_over_x_axis(self):
+        return ThreeDPosition(self.x, -self.z, self.y)
+
+    def get_point_rotated_over_y_axis(self):
+        return ThreeDPosition(self.z, self.y, -self.x)
+
+    def get_point_rotated_over_z_axis(self):
+        return ThreeDPosition(self.y, -self.x, self.z)
+
 
 def get_position_relative_to_another(pos_reference: ThreeDPosition, other_pos: ThreeDPosition) -> ThreeDPosition:
     res_pos_x = other_pos.x - pos_reference.x
