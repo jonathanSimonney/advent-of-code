@@ -77,6 +77,14 @@ def get_position_relative_to_another(pos_reference: ThreeDPosition, other_pos: T
     return ThreeDPosition(res_pos_x, res_pos_y, res_pos_z)
 
 
+def compute_manhattan_dist(pos_1: ThreeDPosition, pos_2: ThreeDPosition) -> int:
+    diff_pos_x = pos_2.x - pos_1.x
+    diff_pos_y = pos_2.y - pos_1.y
+    diff_pos_z = pos_2.z - pos_1.z
+
+    return abs(diff_pos_x) + abs(diff_pos_y) + abs(diff_pos_z)
+
+
 def print_ascii_with_set_position(position_set: set[Position]):
     min_x = 0
     min_y = 0

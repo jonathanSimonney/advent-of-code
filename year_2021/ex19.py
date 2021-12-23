@@ -1,7 +1,7 @@
 import collections
-from typing import TypedDict, Callable, Union
+from typing import TypedDict, Union
 
-from common_helpers.position import ThreeDPosition
+from common_helpers.position import ThreeDPosition, compute_manhattan_dist
 
 
 class ScannerDict(TypedDict):
@@ -12,106 +12,10 @@ class ScannerDict(TypedDict):
     unrelated_scanner_num: set[int]
 
 
-# XYZ
-# -ZYX
-# -XY-Z
-# -XY Z
-
-
-# x     y    z
-# -x    y    -z
-# y    -x    z
-# -y    x   z
-# z     y   -x
-# -z    y   x
-
-# *
-
-# yz, z-y, -y-z, -zy
-# y-z, z-y, -y-z, -zy
-# yz, z-y, -y-z, -zy
-# yz, z-y, -y-z, -zy
-# yz, z-y, -y-z, -zy
-# yz, z-y, -y-z, -zy
-
-# 24 because 4 *3 * 2 probably
 def generate_list_in_all_24_orientations(base_list_orientation_0: list[ThreeDPosition]) -> list[list[ThreeDPosition]]:
     set_ref_point = set()
 
     list_to_ret = []
-    # transform_pos_minus_func: Callable[[ThreeDPosition], ThreeDPosition]
-    # transform_pos_order_func: Callable[[ThreeDPosition], ThreeDPosition]
-    # for minus_transformation in range(8):
-    #     if minus_transformation == 0:
-    #         transform_pos_minus_func = lambda param: param
-    #     elif minus_transformation == 1:
-    #         transform_pos_minus_func = lambda param: ThreeDPosition(-param.x, param.y, param.z)
-    #     elif minus_transformation == 2:
-    #         transform_pos_minus_func = lambda param: ThreeDPosition(param.x, -param.y, param.z)
-    #     elif minus_transformation == 3:
-    #         transform_pos_minus_func = lambda param: ThreeDPosition(param.x, param.y, -param.z)
-    #     elif minus_transformation == 4:
-    #         transform_pos_minus_func = lambda param: ThreeDPosition(-param.x, -param.y, param.z)
-    #     elif minus_transformation == 5:
-    #         transform_pos_minus_func = lambda param: ThreeDPosition(-param.x, -param.y, -param.z)
-    #     elif minus_transformation == 6:
-    #         transform_pos_minus_func = lambda param: ThreeDPosition(-param.x, param.y, -param.z)
-    #     elif minus_transformation == 7:
-    #         transform_pos_minus_func = lambda param: ThreeDPosition(-param.x, -param.y, -param.z)
-    #    # todo the pos calculated here are NOT the right ones. This need to be corrected!
-    #     else:
-    #         raise Exception("unexpected case")
-    #
-    #     for order_transformation in range(6):
-    #         if order_transformation == 0:
-    #             transform_pos_order_func = lambda param: param
-    #         elif order_transformation == 1:
-    #             transform_pos_order_func = lambda param: ThreeDPosition(param.x, param.z, param.y)
-    #         elif order_transformation == 2:
-    #             transform_pos_order_func = lambda param: ThreeDPosition(param.y, param.x, param.z)
-    #         elif order_transformation == 3:
-    #             transform_pos_order_func = lambda param: ThreeDPosition(param.y, param.z, param.x)
-    #         elif order_transformation == 4:
-    #             transform_pos_order_func = lambda param: ThreeDPosition(param.z, param.x, param.y)
-    #         elif order_transformation == 5:
-    #             transform_pos_order_func = lambda param: ThreeDPosition(param.z, param.y, param.x)
-    #         else:
-    #             raise Exception("unexpected case")
-    #
-    #         new_list_orientations = [
-    #             transform_pos_minus_func(transform_pos_order_func(pos)) for pos in base_list_orientation_0
-    #         ]
-    #
-    #         if new_list_orientations[0] not in set_ref_point:
-    #             list_to_ret.append(new_list_orientations)
-    #             set_ref_point.add(new_list_orientations[0])
-    #         # if order_transformation == 1:
-    #         #     print(transform_pos_order_func(ThreeDPosition(1, 2, 3)))
-    #
-    #         # print(new_list_orientations[0])
-    #         # print(list_to_ret)
-    #         # print(len(list_to_ret))
-    #
-    # print(list_to_ret[0][0], list_to_ret[1][0])
-
-    # for main_axis in range(6):
-    #     if main_axis == 0:
-    #         def compute_point_with_main_axis(original_point: ThreeDPosition) -> ThreeDPosition:
-    #             return original_point
-    #     elif main_axis == 1:
-    #         def compute_point_with_main_axis(original_point: ThreeDPosition) -> ThreeDPosition:
-    #             return ThreeDPosition(-original_point.x, original_point.y, original_point.z)
-    #     elif main_axis == 2:
-    #         def compute_point_with_main_axis(original_point: ThreeDPosition) -> ThreeDPosition:
-    #             return ThreeDPosition(original_point.x, original_point.y, original_point.z)
-    #     elif main_axis == 3:
-    #         transform_pos_order_func = lambda param: ThreeDPosition(param.y, param.z, param.x)
-    #     elif main_axis == 4:
-    #         transform_pos_order_func = lambda param: ThreeDPosition(param.z, param.x, param.y)
-    #     elif main_axis == 5:
-    #         transform_pos_order_func = lambda param: ThreeDPosition(param.z, param.y, param.x)
-    #     else:
-    #         raise Exception("unexpected case")
 
     for x_rotate in range(4):
         def x_transformation_method(point_to_transform: ThreeDPosition) -> ThreeDPosition:
@@ -139,7 +43,6 @@ def generate_list_in_all_24_orientations(base_list_orientation_0: list[ThreeDPos
                 if new_list_orientations[0] not in set_ref_point:
                     list_to_ret.append(new_list_orientations)
                     set_ref_point.add(new_list_orientations[0])
-    print(len(list_to_ret))
     return list_to_ret
 
 
@@ -161,37 +64,22 @@ def find_unknown_origin_if_exist(
             dict_possible_origin_score[eventual_origin] += 1
 
             if dict_possible_origin_score[eventual_origin] == 12:
-                # print("found one", eventual_origin)
                 return eventual_origin
 
-    # if ThreeDPosition(-618,-824,-621) in list_relative_to_0 and ThreeDPosition(-686,422,-578) in list_relative_to_unknown_origin:
-    #     print(dict_possible_origin_score)
-    #     print(dict_possible_origin_score[ThreeDPosition(68,-1246,-43)])
-    # print(dict_possible_origin_score)
     return None
 
-nb_scanner_found = 1
 
 def compute_first_scanner_with_intersection(
         list_scanner_dicts: list[ScannerDict],
         dict_beacons_with_all_possible_pos: dict[int, list[list[ThreeDPosition]]]
 ) -> ScannerDict:
-    global nb_scanner_found
 
     for scanner_dict in list_scanner_dicts:
         for scanner_num, list_possible_pos_for_beacon in dict_beacons_with_all_possible_pos.items():
             if scanner_num in scanner_dict['unrelated_scanner_num']:
                 continue
 
-            # print(list_possible_pos_for_beacon[0][0])
-            # print(list_possible_pos_for_beacon[1][0])
             for single_list in list_possible_pos_for_beacon:
-                # if ThreeDPosition(686,422,578) in single_list:
-                #     print("one threed pos found")
-                # elif ThreeDPosition(-686,422,-578) in single_list:
-                #     print("other threed pos found")
-                #     # raise Exception
-                # print(single_list[0])
                 pos_scanner_or_none = find_unknown_origin_if_exist(
                     scanner_dict['list_beacons_pos_relative_to_0'],
                     single_list
@@ -199,9 +87,6 @@ def compute_first_scanner_with_intersection(
 
                 # print(pos_scanner_or_none)
                 if pos_scanner_or_none is not None:
-                    print("found scanner num", scanner_num)
-                    nb_scanner_found += 1
-                    print(nb_scanner_found, 30 - nb_scanner_found)
                     return {
                         'beacon_num': scanner_num,
                         'list_beacons_pos_relative_to_scanner_pos': single_list,
@@ -239,7 +124,6 @@ def main():
             pos_list = line.split(',')
             base_list_beacons.append(ThreeDPosition(int(pos_list[0]), int(pos_list[1]), int(pos_list[2])))
 
-    print("too much debug", base_list_beacons[-1])
     # forgot the tiny 30th
     list_scanner_raw_beacons_results_in_24_possibles_orientations[scanner_num] = \
         generate_list_in_all_24_orientations(base_list_beacons)
@@ -258,12 +142,7 @@ def main():
             list_scanner_dicts,
             list_scanner_raw_beacons_results_in_24_possibles_orientations
         )
-        print(new_scanner_dict)
 
-        if new_scanner_dict is None:
-            print("no match found between ", list_scanner_dicts, "and")
-            print([key_val for key_val in list_scanner_raw_beacons_results_in_24_possibles_orientations.keys()],
-                  [len(value) for value in list_scanner_raw_beacons_results_in_24_possibles_orientations.values()])
         list_scanner_dicts.append(new_scanner_dict)
         del(list_scanner_raw_beacons_results_in_24_possibles_orientations[new_scanner_dict['beacon_num']])
 
@@ -273,6 +152,15 @@ def main():
 
     print(len(set_points))
     print(set_points)
+    largest_manhattan_distance = 0
+    for scanner in list_scanner_dicts:
+        for inner_scanner in list_scanner_dicts:
+            candidate_manhattan_dist = compute_manhattan_dist(scanner['pos'], inner_scanner['pos'])
+            if candidate_manhattan_dist > largest_manhattan_distance:
+                largest_manhattan_distance = candidate_manhattan_dist
+
+    print(largest_manhattan_distance)
+
 
 
 if __name__ == "__main__":
