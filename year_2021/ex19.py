@@ -162,6 +162,5 @@ def main():
     print(largest_manhattan_distance)
 
 
-
 if __name__ == "__main__":
     main()
