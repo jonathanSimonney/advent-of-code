@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Union
 
 
 @dataclass(frozen=True)
@@ -52,6 +53,38 @@ class Position:
         ]
 
 
+def print_ascii_with_set_position(position_set: set[Position]):
+    min_x = 0
+    min_y = 0
+    max_x = None
+    max_y = None
+
+    for pos in position_set:
+        if max_x is None:
+            max_x = pos.x
+            max_y = pos.y
+        else:
+            if pos.x < min_x:
+                min_x = pos.x
+            if pos.x > max_x:
+                max_x = pos.x
+            if pos.y < min_y:
+                min_y = pos.y
+            if pos.y > max_y:
+                max_y = pos.y
+
+    str_to_print = ''
+    for y in range(min_y, max_y + 1):
+        for x in range(min_x, max_x + 1):
+            if Position(x, y) in position_set:
+                str_to_print += '*'
+            else:
+                str_to_print += ' '
+        str_to_print += '\n'
+
+    print(str_to_print)
+
+
 @dataclass(frozen=True)
 class ThreeDPosition:
     """Class for position on an 3 dimensions board."""
@@ -85,33 +118,34 @@ def compute_manhattan_dist(pos_1: ThreeDPosition, pos_2: ThreeDPosition) -> int:
     return abs(diff_pos_x) + abs(diff_pos_y) + abs(diff_pos_z)
 
 
-def print_ascii_with_set_position(position_set: set[Position]):
-    min_x = 0
-    min_y = 0
-    max_x = None
-    max_y = None
+@dataclass(frozen=True)
+class Cuboid:
+    """Class for a cube shape on an 3 dimensions board."""
+    x_min: int
+    x_max: int
+    y_min: int
+    y_max: int
+    z_min: int
+    z_max: int
 
-    for pos in position_set:
-        if max_x is None:
-            max_x = pos.x
-            max_y = pos.y
-        else:
-            if pos.x < min_x:
-                min_x = pos.x
-            if pos.x > max_x:
-                max_x = pos.x
-            if pos.y < min_y:
-                min_y = pos.y
-            if pos.y > max_y:
-                max_y = pos.y
+    def compute_volume(self) -> int:
+        return (self.z_max + 1 - self.z_min) * (self.y_max + 1 - self.y_min) * (self.x_max + 1 - self.x_min)
 
-    str_to_print = ''
-    for y in range(min_y, max_y + 1):
-        for x in range(min_x, max_x + 1):
-            if Position(x, y) in position_set:
-                str_to_print += '*'
-            else:
-                str_to_print += ' '
-        str_to_print += '\n'
 
-    print(str_to_print)
+def compute_intersection_cuboid(cuboid_1: Cuboid, cuboid_2: Cuboid) -> Union[Cuboid, None]:
+    would_be_x_min = max(cuboid_1.x_min, cuboid_2.x_min)
+    would_be_x_max = min(cuboid_1.x_max, cuboid_2.x_max)
+    would_be_y_min = max(cuboid_1.y_min, cuboid_2.y_min)
+    would_be_y_max = min(cuboid_1.y_max, cuboid_2.y_max)
+    would_be_z_min = max(cuboid_1.z_min, cuboid_2.z_min)
+    would_be_z_max = min(cuboid_1.z_max, cuboid_2.z_max)
+
+    if would_be_x_min <= would_be_x_max and would_be_y_min <= would_be_y_max and would_be_z_min <= would_be_z_max:
+        return Cuboid(
+            would_be_x_min,
+            would_be_x_max,
+            would_be_y_min,
+            would_be_y_max,
+            would_be_z_min,
+            would_be_z_max
+        )
