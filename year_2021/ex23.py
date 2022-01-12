@@ -11,6 +11,27 @@ class AmphipodsTypes(Enum):
     EMPTY_SPACE = 0
 
 
+idx_left_room_a = 1
+idx_left_room_b = 2
+idx_left_room_c = 3
+idx_left_room_d = 4
+
+
+list_rooms_idx_moving_leftwards = [
+            idx_left_room_d,
+            idx_left_room_c,
+            idx_left_room_b,
+            idx_left_room_a
+        ]
+
+list_rooms_idx_moving_rightwards = [
+            idx_left_room_d + 1,
+            idx_left_room_c + 1,
+            idx_left_room_b + 1,
+            idx_left_room_a + 1
+        ]
+
+
 class AmphipodBurrow:
     room_a: list[AmphipodsTypes]
     room_b: list[AmphipodsTypes]
@@ -23,6 +44,13 @@ class AmphipodBurrow:
                and self.room_b == [AmphipodsTypes.B, AmphipodsTypes.B] \
                and self.room_c == [AmphipodsTypes.C, AmphipodsTypes.C] \
                and self.room_d == [AmphipodsTypes.D, AmphipodsTypes.D]
+
+    def debug_print(self):
+        print("#############")
+        print(f"#{self.hallway[0]}{self.hallway[1]}.{self.hallway[2]}.{self.hallway[3]}.{self.hallway[4]}.{self.hallway[5]}{self.hallway[6]}#")
+        print(f"###{self.room_a[0]}#{self.room_b[0]}#{self.room_c[0]}#{self.room_d[0]}###")
+        print(f"  #{self.room_a[1]}#{self.room_b[1]}#{self.room_c[1]}#{self.room_d[1]}#  ")
+        print("  #########  ")
 
 
 class BurrowMove:
@@ -49,10 +77,13 @@ def compute_list_move_from_one_room_specific_pos(
         if starting_burrow.hallway[idx_move] != AmphipodsTypes.EMPTY_SPACE:
             break
         nb_move_done += 1
+        # should count properly the moves when passing in front of a room
+        if idx_move != idx_directly_left_of_room and idx_move in list_rooms_idx_moving_leftwards:
+            nb_move_done += 1
 
         local_burrow = copy.deepcopy(starting_burrow)
         local_burrow.hallway[idx_move] = type_amphipods_considered
-        getattr(local_burrow, attribute_room_considered)[0] = AmphipodsTypes.EMPTY_SPACE
+        getattr(local_burrow, attribute_room_considered)[nb_move_to_leave_room - 1] = AmphipodsTypes.EMPTY_SPACE
         move_cost: int = nb_move_done * type_amphipods_considered.value
 
         acc_list.append(BurrowMove(local_burrow, move_cost))
@@ -62,10 +93,13 @@ def compute_list_move_from_one_room_specific_pos(
         if starting_burrow.hallway[idx_move] != AmphipodsTypes.EMPTY_SPACE:
             break
         nb_move_done += 1
+        # should count properly the moves when passing in front of a room
+        if idx_move != idx_directly_left_of_room + 1 and idx_move in list_rooms_idx_moving_rightwards:
+            nb_move_done += 1
 
         local_burrow = copy.deepcopy(starting_burrow)
         local_burrow.hallway[idx_move] = type_amphipods_considered
-        getattr(local_burrow, attribute_room_considered)[0] = AmphipodsTypes.EMPTY_SPACE
+        getattr(local_burrow, attribute_room_considered)[nb_move_to_leave_room - 1] = AmphipodsTypes.EMPTY_SPACE
         move_cost: int = nb_move_done * type_amphipods_considered.value
 
         acc_list.append(BurrowMove(local_burrow, move_cost))
@@ -73,7 +107,23 @@ def compute_list_move_from_one_room_specific_pos(
     return acc_list
 
 
-def compute_list_move_from_one_room(
+def compute_move_to_one_room_specific_pos(
+        attribute_room_considered: str,
+        type_amphipods_considered: AmphipodsTypes,
+        nb_move_to_reach_room_bottom: int,
+        nb_move_to_reach_room_entrance: int,
+        idx_hallway_from: int,
+        starting_burrow: AmphipodBurrow
+) -> BurrowMove:
+    local_burrow = copy.deepcopy(starting_burrow)
+    local_burrow.hallway[idx_hallway_from] = AmphipodsTypes.EMPTY_SPACE
+    getattr(local_burrow, attribute_room_considered)[nb_move_to_reach_room_bottom - 1] = type_amphipods_considered
+    move_cost: int = (nb_move_to_reach_room_bottom + nb_move_to_reach_room_entrance) * type_amphipods_considered.value
+
+    return BurrowMove(local_burrow, move_cost)
+
+
+def compute_list_move_from_and_to_one_room(
         attribute_room_considered: str,
         type_amphipods_considered: AmphipodsTypes,
         idx_directly_left_of_room: int,
@@ -83,28 +133,67 @@ def compute_list_move_from_one_room(
 
     room_considered = getattr(starting_burrow, attribute_room_considered)
 
-    if room_considered != [type_amphipods_considered, type_amphipods_considered] and \
-            room_considered != [AmphipodsTypes.EMPTY_SPACE, AmphipodsTypes.EMPTY_SPACE]:
-        if room_considered[0] != AmphipodsTypes.EMPTY_SPACE:
-            acc_list.extend(
-                compute_list_move_from_one_room_specific_pos(
-                    attribute_room_considered,
-                    type_amphipods_considered,
-                    1,
-                    idx_directly_left_of_room,
-                    starting_burrow
+    if room_considered != [type_amphipods_considered, type_amphipods_considered]:
+        if room_considered != [AmphipodsTypes.EMPTY_SPACE, type_amphipods_considered] and \
+                room_considered != [AmphipodsTypes.EMPTY_SPACE, AmphipodsTypes.EMPTY_SPACE]:
+            if room_considered[0] != AmphipodsTypes.EMPTY_SPACE:
+                acc_list.extend(
+                    compute_list_move_from_one_room_specific_pos(
+                        attribute_room_considered,
+                        type_amphipods_considered,
+                        1,
+                        idx_directly_left_of_room,
+                        starting_burrow
+                    )
                 )
-            )
+            else:
+                acc_list.extend(
+                    compute_list_move_from_one_room_specific_pos(
+                        attribute_room_considered,
+                        type_amphipods_considered,
+                        2,
+                        idx_directly_left_of_room,
+                        starting_burrow
+                    )
+                )
         else:
-            acc_list.extend(
-                compute_list_move_from_one_room_specific_pos(
-                    attribute_room_considered,
-                    type_amphipods_considered,
-                    2,
-                    idx_directly_left_of_room,
-                    starting_burrow
-                )
-            )
+            nb_move_to_reach_room_bottom = 2 if room_considered[1] == AmphipodsTypes.EMPTY_SPACE else 1
+
+            nb_rooms_passed = 0
+            for nb_move, amphipod in enumerate(starting_burrow.hallway[idx_directly_left_of_room::-1]):
+                current_hallway_idx = idx_directly_left_of_room - nb_move
+                if current_hallway_idx in list_rooms_idx_moving_leftwards:
+                    nb_rooms_passed += 1
+
+                if amphipod != AmphipodsTypes.EMPTY_SPACE:
+                    if amphipod == type_amphipods_considered:
+                        acc_list.append(compute_move_to_one_room_specific_pos(
+                            attribute_room_considered,
+                            type_amphipods_considered,
+                            nb_move_to_reach_room_bottom,
+                            nb_move + nb_rooms_passed,
+                            current_hallway_idx,
+                            starting_burrow
+                        ))
+                    break
+
+            nb_rooms_passed = 0
+            for nb_move, amphipod in enumerate(starting_burrow.hallway[idx_directly_left_of_room+1:]):
+                current_hallway_idx = idx_directly_left_of_room + 1 + nb_move
+                if current_hallway_idx in list_rooms_idx_moving_rightwards:
+                    nb_rooms_passed += 1
+
+                if amphipod != AmphipodsTypes.EMPTY_SPACE:
+                    if amphipod == type_amphipods_considered:
+                        acc_list.append(compute_move_to_one_room_specific_pos(
+                            attribute_room_considered,
+                            type_amphipods_considered,
+                            nb_move_to_reach_room_bottom,
+                            nb_move + nb_rooms_passed,
+                            current_hallway_idx,
+                            starting_burrow
+                        ))
+                    break
 
     return acc_list
 
@@ -112,17 +201,23 @@ def compute_list_move_from_one_room(
 def compute_list_allowed_move(starting_burrow: AmphipodBurrow) -> list[BurrowMove]:
     acc_list: list[BurrowMove] = []
 
-    idx_left_room_a = 1
-    idx_left_room_b = 2
-    idx_left_room_c = 3
-    idx_left_room_d = 4
+    global idx_left_room_a
+    global idx_left_room_b
+    global idx_left_room_c
+    global idx_left_room_d
 
-    acc_list.extend(compute_list_move_from_one_room('room_a', AmphipodsTypes.A, idx_left_room_a, starting_burrow))
-    acc_list.extend(compute_list_move_from_one_room('room_b', AmphipodsTypes.B, idx_left_room_b, starting_burrow))
-    acc_list.extend(compute_list_move_from_one_room('room_c', AmphipodsTypes.C, idx_left_room_c, starting_burrow))
-    acc_list.extend(compute_list_move_from_one_room('room_d', AmphipodsTypes.D, idx_left_room_d, starting_burrow))
-
-    #todo add the moves from hallway to rooms then
+    acc_list.extend(
+        compute_list_move_from_and_to_one_room('room_a', AmphipodsTypes.A, idx_left_room_a, starting_burrow)
+    )
+    acc_list.extend(
+        compute_list_move_from_and_to_one_room('room_b', AmphipodsTypes.B, idx_left_room_b, starting_burrow)
+    )
+    acc_list.extend(
+        compute_list_move_from_and_to_one_room('room_c', AmphipodsTypes.C, idx_left_room_c, starting_burrow)
+    )
+    acc_list.extend(
+        compute_list_move_from_and_to_one_room('room_d', AmphipodsTypes.D, idx_left_room_d, starting_burrow)
+    )
 
     return acc_list
 
@@ -151,21 +246,32 @@ def get_real_amphipod_burrow_start() -> AmphipodBurrow:
     return burrow_to_ret
 
 
-def recursively_compute_possibles_move_list_to_tidied_burrow(starting_burrow: AmphipodBurrow) -> list[list[BurrowMove]]:
-    while not starting_burrow.is_burrow_tidied():
-        list_candidates_burrows_move = compute_list_allowed_move(starting_burrow)
-        for burrow_move in list_candidates_burrows_move:
-            # check if move makes a tidied burrow, if yes, stop and add it to the list candidates full move, else
-            # back in recursion
-            pass
-    pass
+def recursively_compute_possibles_move_list_to_tidied_burrow(
+        list_move_to_current_burrow: list[BurrowMove]
+) -> list[list[BurrowMove]]:
+    list_burrow_moves_to_ret: list[list[BurrowMove]] = []
+    starting_burrow = list_move_to_current_burrow[-1].arrival_state
+
+    starting_burrow.debug_print()
+
+    list_candidates_burrows_move = compute_list_allowed_move(starting_burrow)
+    for burrow_move in list_candidates_burrows_move:
+        local_move_list: list[BurrowMove] = list_move_to_current_burrow + [burrow_move]
+
+        if burrow_move.arrival_state.is_burrow_tidied():
+            list_burrow_moves_to_ret.append(local_move_list)
+        else:
+            list_burrow_moves_to_ret.extend(
+                recursively_compute_possibles_move_list_to_tidied_burrow(list_move_to_current_burrow + [burrow_move])
+            )
+    return list_burrow_moves_to_ret
 
 
 def main():
     starting_burrow = get_test_amphipod_burrow_start()
     # starting_burrow = get_real_amphipod_burrow_start()
 
-    valid_moves_list = recursively_compute_possibles_move_list_to_tidied_burrow(starting_burrow)
+    valid_moves_list = recursively_compute_possibles_move_list_to_tidied_burrow([BurrowMove(starting_burrow, 0)])
 
     candidate_lower_cost = Union[None, int]
     for list_moves in valid_moves_list:
@@ -174,8 +280,6 @@ def main():
             candidate_lower_cost = cost_total_moves
 
     print(candidate_lower_cost)
-
-
 
 
 if __name__ == "__main__":
