@@ -16,14 +16,14 @@ idx_left_room_c = 3
 idx_left_room_d = 4
 
 
-list_rooms_idx_moving_leftwards = [
+list_left_rooms_idx = [
             idx_left_room_d,
             idx_left_room_c,
             idx_left_room_b,
             idx_left_room_a
         ]
 
-list_rooms_idx_moving_rightwards = [
+list_right_rooms_idx = [
             idx_left_room_d + 1,
             idx_left_room_c + 1,
             idx_left_room_b + 1,
@@ -70,6 +70,33 @@ class AmphipodBurrow:
                 total_cost += room_amphipod_type.value * (len_room - idx)  # cost to get in
 
         return total_cost
+
+    @staticmethod
+    def compute_nb_move_to_dest_room(idx_hallway: int, amphipod_type: AmphipodsTypes) -> int:
+        idx_left_dest_room: int
+        if amphipod_type == AmphipodsTypes.A:
+            idx_left_dest_room = idx_left_room_a
+        elif amphipod_type == AmphipodsTypes.B:
+            idx_left_dest_room = idx_left_room_b
+        elif amphipod_type == AmphipodsTypes.C:
+            idx_left_dest_room = idx_left_room_c
+        elif amphipod_type == AmphipodsTypes.D:
+            idx_left_dest_room = idx_left_room_d
+        else:
+            raise ValueError('in valid params given')
+
+        if idx_hallway <= idx_left_dest_room:
+            # we're coming from the left
+            nb_rooms_passed = sum([1 if idx_hallway <= left_idx <= idx_left_dest_room else 0 for left_idx in list_left_rooms_idx])
+            return idx_left_dest_room - idx_hallway + nb_rooms_passed
+        else:
+            idx_right_dest_room = idx_left_dest_room + 1
+            nb_rooms_passed = sum(
+                [1 if idx_right_dest_room <= right_idx <= idx_hallway else 0 for right_idx in list_right_rooms_idx])
+            # print(f"{idx_hallway},  {idx_right_dest_room}, {nb_rooms_passed}")
+            return idx_hallway - idx_right_dest_room + nb_rooms_passed
+
+
 
     def debug_print(self):
         dict_amphipod_to_debug_str: dict[AmphipodsTypes, str] = {
@@ -119,34 +146,41 @@ def compute_list_move_from_one_room_specific_pos(
 
     nb_move_done: int = 0
 
+    # right
+    idx_directly_right_of_room = idx_directly_left_of_room + 1
+    for idx_move in range(idx_directly_right_of_room, 7):
+        if starting_burrow.hallway[idx_move] != AmphipodsTypes.EMPTY_SPACE:
+            break
+        nb_move_done += 1
+        # should count properly the moves when passing in front of a room
+        if idx_move != idx_directly_right_of_room and idx_move in list_right_rooms_idx:
+            nb_move_done += 1
+
+        local_burrow = copy.deepcopy(starting_burrow)
+        local_burrow.hallway[idx_move] = type_amphipods_considered
+        getattr(local_burrow, attribute_room_considered)[idx_elem_in_room] = AmphipodsTypes.EMPTY_SPACE
+
+        nb_move_to_dest_room = AmphipodBurrow.compute_nb_move_to_dest_room(idx_move, type_amphipods_considered)
+        move_cost: int = (nb_move_done + nb_move_to_dest_room) * type_amphipods_considered.value
+        # print(f"new move calculated, total: {move_cost}, for type {type_amphipods_considered}, {nb_move_done} to idx {idx_move}, and {nb_move_to_dest_room} to room")
+        acc_list.append(BurrowMove(local_burrow, move_cost))
+
+    nb_move_done = 0
+
+    # left
     for idx_move in range(idx_directly_left_of_room, -1, -1):
         if starting_burrow.hallway[idx_move] != AmphipodsTypes.EMPTY_SPACE:
             break
         nb_move_done += 1
         # should count properly the moves when passing in front of a room
-        if idx_move != idx_directly_left_of_room and idx_move in list_rooms_idx_moving_leftwards:
+        if idx_move != idx_directly_left_of_room and idx_move in list_left_rooms_idx:
             nb_move_done += 1
 
         local_burrow = copy.deepcopy(starting_burrow)
         local_burrow.hallway[idx_move] = type_amphipods_considered
         getattr(local_burrow, attribute_room_considered)[idx_elem_in_room] = AmphipodsTypes.EMPTY_SPACE
-        move_cost: int = nb_move_done * type_amphipods_considered.value
-
-        acc_list.append(BurrowMove(local_burrow, move_cost))
-
-    nb_move_done = 0
-    for idx_move in range(idx_directly_left_of_room + 1, 7):
-        if starting_burrow.hallway[idx_move] != AmphipodsTypes.EMPTY_SPACE:
-            break
-        nb_move_done += 1
-        # should count properly the moves when passing in front of a room
-        if idx_move != idx_directly_left_of_room + 1 and idx_move in list_rooms_idx_moving_rightwards:
-            nb_move_done += 1
-
-        local_burrow = copy.deepcopy(starting_burrow)
-        local_burrow.hallway[idx_move] = type_amphipods_considered
-        getattr(local_burrow, attribute_room_considered)[idx_elem_in_room] = AmphipodsTypes.EMPTY_SPACE
-        move_cost: int = nb_move_done * type_amphipods_considered.value
+        nb_move_to_dest_room = AmphipodBurrow.compute_nb_move_to_dest_room(idx_move, type_amphipods_considered)
+        move_cost: int = (nb_move_done + nb_move_to_dest_room) * type_amphipods_considered.value
 
         acc_list.append(BurrowMove(local_burrow, move_cost))
 
@@ -157,14 +191,13 @@ def compute_move_to_one_room_specific_pos(
         attribute_room_considered: str,
         type_amphipods_considered: AmphipodsTypes,
         idx_elem_in_room: int,
-        nb_move_to_reach_room_entrance: int,
         idx_hallway_from: int,
         starting_burrow: AmphipodBurrow
 ) -> BurrowMove:
     local_burrow = copy.deepcopy(starting_burrow)
     local_burrow.hallway[idx_hallway_from] = AmphipodsTypes.EMPTY_SPACE
     getattr(local_burrow, attribute_room_considered)[idx_elem_in_room] = type_amphipods_considered
-    move_cost: int = nb_move_to_reach_room_entrance * type_amphipods_considered.value
+    move_cost: int = 0
 
     return BurrowMove(local_burrow, move_cost)
 
@@ -212,11 +245,11 @@ def compute_list_move_from_and_to_one_room(
             # TO part
             idx_room_elem = 1 if room_considered[1] == AmphipodsTypes.EMPTY_SPACE else 0
 
-            nb_rooms_passed = 0
+            # nb_rooms_passed = 0
             for nb_move, amphipod in enumerate(starting_burrow.hallway[idx_directly_left_of_room::-1]):
                 current_hallway_idx = idx_directly_left_of_room - nb_move
-                if current_hallway_idx in list_rooms_idx_moving_leftwards:
-                    nb_rooms_passed += 1
+                # if current_hallway_idx in list_rooms_idx_moving_leftwards:
+                #     nb_rooms_passed += 1
 
                 if amphipod != AmphipodsTypes.EMPTY_SPACE:
                     if amphipod == type_amphipods_considered:
@@ -226,7 +259,7 @@ def compute_list_move_from_and_to_one_room(
                                     attribute_room_considered,
                                     type_amphipods_considered,
                                     idx_room_elem,
-                                    nb_move + nb_rooms_passed,
+                                    # nb_move + nb_rooms_passed,
                                     current_hallway_idx,
                                     starting_burrow
                                 )],
@@ -234,11 +267,11 @@ def compute_list_move_from_and_to_one_room(
                         }
                     break
 
-            nb_rooms_passed = 0
+            # nb_rooms_passed = 0
             for nb_move, amphipod in enumerate(starting_burrow.hallway[idx_directly_left_of_room+1:]):
                 current_hallway_idx = idx_directly_left_of_room + 1 + nb_move
-                if current_hallway_idx in list_rooms_idx_moving_rightwards:
-                    nb_rooms_passed += 1
+                # if current_hallway_idx in list_rooms_idx_moving_rightwards:
+                #     nb_rooms_passed += 1
 
                 if amphipod != AmphipodsTypes.EMPTY_SPACE:
                     if amphipod == type_amphipods_considered:
@@ -248,7 +281,7 @@ def compute_list_move_from_and_to_one_room(
                                     attribute_room_considered,
                                     type_amphipods_considered,
                                     idx_room_elem,
-                                    nb_move + nb_rooms_passed,
+                                    # nb_move + nb_rooms_passed,
                                     current_hallway_idx,
                                     starting_burrow
                                 )],
@@ -380,8 +413,8 @@ def recursively_compute_min_cost(
 
 
 def main():
-    starting_burrow = get_test_amphipod_burrow_start()
-    # starting_burrow = get_real_amphipod_burrow_start()
+    # starting_burrow = get_test_amphipod_burrow_start()
+    starting_burrow = get_real_amphipod_burrow_start()
 
     constant_move_cost = starting_burrow.compute_room_move_cost()
 
