@@ -5,12 +5,14 @@ from typing import Union, TypedDict
 
 sys.setrecursionlimit(60)
 
+
 class AmphipodsTypes(Enum):
     A = 1
     B = 10
     C = 100
     D = 1000
     EMPTY_SPACE = 0
+
 
 idx_left_room_a = 1
 idx_left_room_b = 2
