@@ -26,11 +26,12 @@ class CratePiles:
     def _add_crate_to_pile_top(self, idx_pile: int, crate_id: str):
         self.crate_list[idx_pile].append(crate_id)
 
-    def move_n_crate_between_pile(self, nb_crate_moved, origin_pile, arrival_pile):
-        for _ in range(nb_crate_moved):
-            self.move_one_crate_between_pile(origin_pile, arrival_pile)
+    def move_n_crate_between_pile(self, nb_crate_moved: int, origin_pile: int, arrival_pile: int):
+        list_crates_moved = self.crate_list[origin_pile][-nb_crate_moved:]
+        self.crate_list[origin_pile] = self.crate_list[origin_pile][:-nb_crate_moved]
+        self.crate_list[arrival_pile].extend(list_crates_moved)
 
-    def move_one_crate_between_pile(self, origin_pile, arrival_pile):
+    def move_one_crate_between_pile(self, origin_pile: int, arrival_pile: int):
         crate_moved_id = self.crate_list[origin_pile].pop()
         self.crate_list[arrival_pile].append(crate_moved_id)
 
