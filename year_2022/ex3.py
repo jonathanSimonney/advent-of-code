@@ -18,7 +18,7 @@ with open("data.txt") as f:
 
 acc: int = 0
 
-group_list: list[str] = []
+group_list: List[str] = []
 
 for line in content:
     group_list.append(line)
