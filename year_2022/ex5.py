@@ -40,7 +40,7 @@ class CratePiles:
 
 
 with open("data.txt") as f:
-    content = [x.strip() for x in f.readlines()]
+    content = f.read().splitlines()
 # you may also want to remove whitespace characters like `\n` at the end of each line
 # content = [parse_line_content(x) for x in content]
 
