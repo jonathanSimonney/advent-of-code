@@ -89,12 +89,12 @@ class FileSystem:
         unused_space = 70000000 - total_space_taken
         needed_space_to_delete = 30000000 - unused_space
 
-        print(total_space_taken, unused_space, needed_space_to_delete)
-        print(self.root.childs)
-        print(self._folder_size_dict)
-        # print(self._folder_size_dict['/a'])
-        # print(self._folder_size_dict['/'])
-        # print(self._folder_size_dict['/'])
+        # print(total_space_taken, unused_space, needed_space_to_delete)
+        # print(self.root.childs)
+        # print(self._folder_size_dict)
+        # # print(self._folder_size_dict['/a'])
+        # # print(self._folder_size_dict['/'])
+        # # print(self._folder_size_dict['/'])
 
         deletion_size_candidate = total_space_taken
 
@@ -112,7 +112,7 @@ class FileSystem:
             self._folder_size_dict[folder_path] = folder_to_parse.compute_size()
 
 
-with open("testData.txt") as f:
+with open("data.txt") as f:
     content = f.read().splitlines()
 
 fs: FileSystem = FileSystem()
@@ -136,5 +136,8 @@ for line in content:
             raise AssertionError('unknown command')
     else:
         buffer_strs_to_ls.append(line)
+
+fs.apply_ls(buffer_strs_to_ls)
+buffer_strs_to_ls = []
 # 2319218 too low
 print(fs.get_result_part_2())
