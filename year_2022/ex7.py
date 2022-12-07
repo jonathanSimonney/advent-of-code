@@ -89,13 +89,6 @@ class FileSystem:
         unused_space = 70000000 - total_space_taken
         needed_space_to_delete = 30000000 - unused_space
 
-        # print(total_space_taken, unused_space, needed_space_to_delete)
-        # print(self.root.childs)
-        # print(self._folder_size_dict)
-        # # print(self._folder_size_dict['/a'])
-        # # print(self._folder_size_dict['/'])
-        # # print(self._folder_size_dict['/'])
-
         deletion_size_candidate = total_space_taken
 
         for folder_size in self._folder_size_dict.values():
@@ -107,7 +100,7 @@ class FileSystem:
     def _fill_dict_folder_size(self, folder_to_parse: Folder, folder_path: str):
         for elem in folder_to_parse.childs:
             if isinstance(elem, Folder):
-                self._fill_dict_folder_size(elem, folder_path + '/' + elem.name)
+                self._fill_dict_folder_size(elem, folder_path + elem.name + '/')
         if folder_path not in self._folder_size_dict:
             self._folder_size_dict[folder_path] = folder_to_parse.compute_size()
 
