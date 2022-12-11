@@ -60,6 +60,18 @@ class Position:
             self.get_right_pos()
         ]
 
+    def get_pos_direction(self, direction: Direction) -> 'Position':
+        if direction == Direction.UP:
+            return self.get_top_pos()
+        elif direction == Direction.DOWN:
+            return self.get_bottom_pos()
+        elif direction == Direction.RIGHT:
+            return self.get_right_pos()
+        elif direction == Direction.LEFT:
+            return self.get_left_pos()
+        else:
+            raise AssertionError("position invalid")
+
 
 def print_ascii_with_set_position(position_set: set[Position]):
     min_x = 0

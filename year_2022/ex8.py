@@ -35,30 +35,11 @@ def compute_scenic_score_given_tree(dict_trees: Dict[Position, Tree], tree_pos: 
 
 def get_len_view_direction(dict_trees: Dict[Position, Tree], tree_pos: Position, direction: Direction) -> int:
     tree_height = dict_trees[tree_pos].height
-    func_get_next_pos: Callable[[Position], Position]
-    if direction == Direction.UP:
-        def get_next_pos(old_pos: Position) -> Position:
-            return old_pos.get_top_pos()
-        func_get_next_pos = get_next_pos
-    elif direction == Direction.DOWN:
-        def get_next_pos(old_pos: Position) -> Position:
-            return old_pos.get_bottom_pos()
-        func_get_next_pos = get_next_pos
-    elif direction == Direction.RIGHT:
-        def get_next_pos(old_pos: Position) -> Position:
-            return old_pos.get_right_pos()
-        func_get_next_pos = get_next_pos
-    elif direction == Direction.LEFT:
-        def get_next_pos(old_pos: Position) -> Position:
-            return old_pos.get_left_pos()
-        func_get_next_pos = get_next_pos
-    else:
-        raise AssertionError("position invalid")
 
     acc = 0
     new_pos = tree_pos
     while True:
-        new_pos = func_get_next_pos(new_pos)
+        new_pos = new_pos.get_pos_direction(direction)
         try:
             candidate_height = dict_trees[new_pos].height
             if candidate_height < tree_height:
