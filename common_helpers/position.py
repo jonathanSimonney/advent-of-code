@@ -60,6 +60,22 @@ class Position:
             self.get_right_pos()
         ]
 
+    def get_all_diagonal_pos(self):
+        return [
+            self.get_bottom_right_pos(),
+            self.get_bottom_left_pos(),
+            self.get_top_left_pos(),
+            self.get_top_right_pos(),
+        ]
+
+    def get_pos_direction_and_space(self, direction: Direction, nb_space: int) -> 'Position':
+        to_ret = self
+
+        for _ in range(nb_space):
+            to_ret = to_ret.get_pos_direction(direction)
+
+        return to_ret
+
     def get_pos_direction(self, direction: Direction) -> 'Position':
         if direction == Direction.UP:
             return self.get_top_pos()
@@ -71,6 +87,9 @@ class Position:
             return self.get_left_pos()
         else:
             raise AssertionError("position invalid")
+
+    def get_pos_with_vector(self, x_vector: int, y_vector: int) -> 'Position':
+        return Position(self.x + x_vector, self.y + y_vector)
 
 
 def print_ascii_with_set_position(position_set: set[Position]):

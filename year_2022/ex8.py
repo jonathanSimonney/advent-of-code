@@ -51,7 +51,7 @@ def get_len_view_direction(dict_trees: Dict[Position, Tree], tree_pos: Position,
 
 
 def main():
-    with open("data.txt") as f:
+    with open("testData.txt") as f:
         content = f.read().splitlines()
 
     dict_trees: Dict[Position, Tree] = {}
