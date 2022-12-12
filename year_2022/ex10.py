@@ -10,7 +10,7 @@ def main():
 
     dict_add_instructions: Dict[int, int] = {}
 
-    nb_cycle = 0
+    nb_cycle = 1
 
     for nb_line, line in enumerate(content):
         if line != 'noop':
@@ -21,13 +21,25 @@ def main():
 
     acc = 0
     registry_value = 1
-    for nb_cycle in range(nb_cycle):
-        if nb_cycle in [20, 60, 100, 140, 180, 220]:
-            acc += nb_cycle * registry_value
+    acc_str = ''
+    for nb_cycle in range(1, nb_cycle + 1):
         if nb_cycle in dict_add_instructions:
             registry_value += dict_add_instructions[nb_cycle]
+        if registry_value - 1 <= nb_cycle % 40 - 1 <= registry_value + 1:
+            acc_str += '#'
+        else:
+            acc_str += '.'
+        if nb_cycle in [20, 60, 100, 140, 180, 220]:
+            acc += nb_cycle * registry_value
 
     print(acc)
+    print(acc_str[:40])
+    print(acc_str[40:80])
+    print(acc_str[80:120])
+    print(acc_str[120:160])
+    print(acc_str[160:200])
+    print(acc_str[200:240])
+
 
 if __name__ == "__main__":
     main()
