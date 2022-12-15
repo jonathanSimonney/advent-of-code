@@ -1,4 +1,5 @@
 import collections
+import math
 from dataclasses import dataclass
 from typing import Set, List, Dict, Callable, TypedDict
 
@@ -13,11 +14,19 @@ class MonkeyData:
     test_not_ok_target: int
 
 
+ppcm_divisers: int
+
+
 class Monkey:
     items_worry_level: List[int]
     operation_performed: Callable[[int], int]
     get_number_targeted_monkey: Callable[[int], int]
     nb_time_inspected_items: int
+
+    # un dict pour les items déjà reçus avec leur numéro % le ppcm des diviseurs.
+    # Quand on reçoit un item, SI l'item a "fait un cycle" (présent dans le dict) ET qu'il est passé par tout les singes
+    # (tous ont pû ENREGISTRER son cycle), ALORS, on le supprime, ET on ajoute au nb_time_inspected_items le nombre de
+    # fois qu'il nous serait revenu. Quand tt les singes ont leur liste d'item vide, on arrête la boucle de la mort
 
     def __init__(
             self,
@@ -33,7 +42,7 @@ class Monkey:
     def take_turn(self) -> Dict[int, List[int]]:
         dict_to_ret: Dict[int, List[int]] = collections.defaultdict(lambda: list())
         for worry_level in self.items_worry_level:
-            new_worry_level = self.operation_performed(worry_level)
+            new_worry_level = self.operation_performed(worry_level) % ppcm_divisers
             dict_to_ret[self.get_number_targeted_monkey(new_worry_level)].append(new_worry_level)
             self.nb_time_inspected_items += 1
         self.items_worry_level = []
@@ -80,10 +89,12 @@ def main():
         content = f.read().splitlines()
 
     list_monkeys: List[Monkey] = []
+    list_monkey_data: List[MonkeyData] = []
 
     monkey_data: MonkeyData = MonkeyData()
     for line in content:
         if line == '':
+            list_monkey_data.append(monkey_data)
             monkey_to_add = build_monkey_from_dataclass(monkey_data)
             list_monkeys.append(monkey_to_add)
             monkey_data = MonkeyData()
@@ -100,8 +111,12 @@ def main():
             elif splitted_line[0] == 'If false':
                 monkey_data.test_not_ok_target = int(splitted_line[1].split(' ')[-1])
 
+    list_monkey_data.append(monkey_data)
     monkey_to_add = build_monkey_from_dataclass(monkey_data)
     list_monkeys.append(monkey_to_add)
+
+    global ppcm_divisers
+    ppcm_divisers = math.prod([sgl_monkey_data.test_divider for sgl_monkey_data in list_monkey_data])
 
     for _ in range(10000):
         play_round(list_monkeys)
