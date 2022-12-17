@@ -92,6 +92,12 @@ class Position:
         return Position(self.x + x_vector, self.y + y_vector)
 
 
+@dataclass(frozen=True)
+class Traject:
+    pos_1: Position
+    pos_2: Position
+
+
 def print_ascii_with_set_position(position_set: set[Position]):
     min_x = 0
     min_y = 0

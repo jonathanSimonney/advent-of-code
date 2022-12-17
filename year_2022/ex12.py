@@ -1,8 +1,11 @@
+import collections
 import string
-from typing import List, Set, Union, Optional
+from typing import List, Set, Union, Optional, Dict
 
-from common_helpers.position import Position
+from common_helpers.position import Position, Traject
 
+import sys
+sys.setrecursionlimit(5000)
 
 dict_positions_to_elevation: dict[Position, int] = {}
 dict_positions_to_reachable_next_pos: dict[Position, List[Position]] = {}
@@ -19,25 +22,21 @@ def compute_reachable_pos_from(position: Position) -> List[Position]:
     return list_to_ret
 
 
-def find_shortest_path_len_between_pos(
-        start: Position,
-        end: Position,
-        set_visited_pos: Set[Position] = None
-) -> Optional[int]:
-    if set_visited_pos is None:
-        set_visited_pos: Set[Position] = {start}
-    if start == end:
-        return 0
-    best_solution: Optional[int] = None
-    for pos in dict_positions_to_reachable_next_pos[start]:
-        if pos not in set_visited_pos:
-            set_visited_pos.add(pos)
-            possible_solution = find_shortest_path_len_between_pos(pos, end, set_visited_pos)
-            if possible_solution is not None and (best_solution is None or best_solution > possible_solution + 1):
-                print(possible_solution)
-                best_solution = possible_solution + 1
-            set_visited_pos.remove(pos)
-    return best_solution
+dict_shortcut_traject_cost: Dict[Position, Optional[int]] = {}
+
+
+def fill_dict_costs(start_pos: Position):
+    dict_shortcut_traject_cost[start_pos] = 0
+    rec_fill_adjacents_pos_costs(start_pos, 0)
+
+
+def rec_fill_adjacents_pos_costs(pos: Position, cost_pos: int):
+    candidate_cost = cost_pos + 1
+
+    for adjacent_pos in dict_positions_to_reachable_next_pos[pos]:
+        if adjacent_pos not in dict_shortcut_traject_cost or dict_shortcut_traject_cost[adjacent_pos] > candidate_cost:
+            dict_shortcut_traject_cost[adjacent_pos] = candidate_cost
+            rec_fill_adjacents_pos_costs(adjacent_pos, candidate_cost)
 
 
 def main():
@@ -65,7 +64,12 @@ def main():
     for position in dict_positions_to_elevation.keys():
         dict_positions_to_reachable_next_pos[position] = compute_reachable_pos_from(position)
 
-    print(find_shortest_path_len_between_pos(pos_start, pos_end))
+    print(dict_positions_to_reachable_next_pos[Position(2, 0)])
+    print(pos_end)
+    fill_dict_costs(pos_start)
+
+    print(dict_shortcut_traject_cost[pos_end])
+    # print(find_shortest_path_len_between_pos(pos_start, pos_end))
 
 
 if __name__ == "__main__":
