@@ -18,3 +18,9 @@ def range_overlap(range1: range, range2: range) -> Union[range, None]:
     """Whether range1 is a subset of range2."""
     range_to_ret = range(max(range1[0], range2[0]), min(range1[-1], range2[-1])+1)
     return None if len(range_to_ret) == 0 else range_to_ret
+
+
+def create_inclusive_range_properly_ordered(start: int, end: int) -> range:
+    if start > end:
+        return range(start, end - 1, -1)
+    return range(start, end + 1)

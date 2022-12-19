@@ -70,13 +70,13 @@ class ListValue:
         elif isinstance(other, ListValue):
             return compare_list_values(self, other) == 1
         raise AssertionError("expected a value param")
-    #
-    # def __eq__(self, other):
-    #     if isinstance(other, IntValue):
-    #         pass
-    #     elif isinstance(other, ListValue):
-    #         pass
-    #     raise AssertionError("expected a value param")
+
+    def __eq__(self, other):
+        if isinstance(other, IntValue):
+            return False
+        elif isinstance(other, ListValue):
+            return compare_list_values(self, other) == 0
+        raise AssertionError("expected a value param")
 
     @staticmethod
     def from_str(init_str) -> 'ListValue':
@@ -117,10 +117,10 @@ class Packet:
     #         pass
     #     raise AssertionError("expected a packet param")
     #
-    # def __eq__(self, other):
-    #     if isinstance(other, Packet):
-    #         pass
-    #     raise AssertionError("expected a packet param")
+    def __eq__(self, other):
+        if isinstance(other, Packet):
+            return self.list_elems == other.list_elems
+        raise AssertionError("expected a packet param")
 
     @staticmethod
     def from_str(init_str) -> 'Packet':
@@ -137,6 +137,8 @@ def main():
     right_pair: Optional[Packet] = None
 
     pair_list: List[List[Packet]] = []
+
+    all_packets_list: List[Packet] = []
     for line in content:
         if left_pair is None:
             left_pair = Packet.from_str(line)
@@ -144,17 +146,35 @@ def main():
             right_pair = Packet.from_str(line)
         else:
             pair_list.append([left_pair, right_pair])
+            all_packets_list.append(left_pair)
+            all_packets_list.append(right_pair)
             left_pair = None
             right_pair = None
 
     if left_pair is not None and right_pair is not None:
         pair_list.append([left_pair, right_pair])
+        all_packets_list.append(left_pair)
+        all_packets_list.append(right_pair)
 
-    acc: int = 0
-    for idx_pair, pair in enumerate(pair_list):
-        if pair[0] < pair[1]:
-            acc += idx_pair + 1
+    packet_divider_1 = Packet.from_str('[[2]]')
+    packet_divider_2 = Packet.from_str('[[6]]')
+    all_packets_list.append(packet_divider_1)
+    all_packets_list.append(packet_divider_2)
 
+    # acc: int = 0
+    # for idx_pair, pair in enumerate(pair_list):
+    #     if pair[0] < pair[1]:
+    #         acc += idx_pair + 1
+    #
+    # print(acc)
+
+    all_packets_list.sort()
+    acc = 1
+    for idx_packet, packet in enumerate(all_packets_list):
+        if packet == packet_divider_1 or packet == packet_divider_2:
+            acc *= (idx_packet + 1)
+
+    # 22550 too low
     print(acc)
 
 
