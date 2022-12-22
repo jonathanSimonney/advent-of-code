@@ -8,30 +8,35 @@ from common_helpers.range_helper import create_inclusive_range_properly_ordered
 class System:
     set_rock_pos: Set[Position] = set()
     set_sand_pos: Set[Position] = set()
-    _last_sand_grain_forelast_pos: Optional[Position] = None
+    _last_sand_grain_path_followed: List[Position] = []
     abyss_ceiling_y: Optional[int] = None
 
     def make_grain_fall_until_abyss(self):
-        pass
+        while True:
+            if not self._make_grain_fall():
+                break
 
     # will return True if grain went to rest, False if it ended in the abyss,
     def _make_grain_fall(self) -> bool:
-        if self._last_sand_grain_forelast_pos is None:
-            self._last_sand_grain_forelast_pos = Position(500, 0)
-        next_pos = self._compute_next_valid_pos_from(self._last_sand_grain_forelast_pos)
-        while next_pos is not False and next_pos.y < self.abyss_ceiling_y:
-            self._last_sand_grain_forelast_pos = next_pos
-            next_pos = self._compute_next_valid_pos_from(self._last_sand_grain_forelast_pos)
+        if not self._last_sand_grain_path_followed:
+            self._last_sand_grain_path_followed.append(Position(500, 0))
 
-        if next_pos.y >= self.abyss_ceiling_y:
-            return False
+        while True:
+            start_pos = self._last_sand_grain_path_followed[-1]
+            next_pos = self._compute_next_valid_pos_from(start_pos)
 
-        # come back here to ensure the grain fall logic is ok
-        self.set_sand_pos.add(next_pos)
+            if not next_pos:
+                self.set_sand_pos.add(start_pos)
+                self._last_sand_grain_path_followed.pop()
+                return True
 
+            if next_pos.y >= self.abyss_ceiling_y:
+                return False
+
+            self._last_sand_grain_path_followed.append(next_pos)
 
     # will return false if no valid next pos is available
-    def _compute_next_valid_pos_from(self, from_pos: Position) -> Union[Position, False]:
+    def _compute_next_valid_pos_from(self, from_pos: Position) -> Union[Position, bool]:
         candidate_pos = from_pos.get_bottom_pos()
         if not self._is_pos_occupied(candidate_pos):
             return candidate_pos
@@ -94,7 +99,7 @@ def main():
     for line in content:
         parse_line_in_system(line, system)
 
-    # system.make_grain_fall_until_abyss()
+    system.make_grain_fall_until_abyss()
 
     print(len(system.set_sand_pos))
     print(system.abyss_ceiling_y)
