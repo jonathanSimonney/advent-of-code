@@ -8,30 +8,23 @@ from common_helpers.range_helper import create_inclusive_range_properly_ordered
 class System:
     set_rock_pos: Set[Position] = set()
     set_sand_pos: Set[Position] = set()
-    _last_sand_grain_path_followed: List[Position] = []
+    _last_sand_grain_path_followed: List[Position] = [Position(500, 0)]
     abyss_ceiling_y: Optional[int] = None
 
     def make_grain_fall_until_abyss(self):
-        while True:
-            if not self._make_grain_fall():
-                break
+        while self._last_sand_grain_path_followed:
+            self._make_grain_fall()
 
     # will return True if grain went to rest, False if it ended in the abyss,
     def _make_grain_fall(self) -> bool:
-        if not self._last_sand_grain_path_followed:
-            self._last_sand_grain_path_followed.append(Position(500, 0))
-
         while True:
             start_pos = self._last_sand_grain_path_followed[-1]
             next_pos = self._compute_next_valid_pos_from(start_pos)
 
-            if not next_pos:
+            if not next_pos or next_pos.y >= self.abyss_ceiling_y + 2:
                 self.set_sand_pos.add(start_pos)
                 self._last_sand_grain_path_followed.pop()
                 return True
-
-            if next_pos.y >= self.abyss_ceiling_y:
-                return False
 
             self._last_sand_grain_path_followed.append(next_pos)
 
