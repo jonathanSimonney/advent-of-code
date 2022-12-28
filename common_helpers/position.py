@@ -91,6 +91,12 @@ class Position:
     def get_pos_with_vector(self, x_vector: int, y_vector: int) -> 'Position':
         return Position(self.x + x_vector, self.y + y_vector)
 
+    def compute_manhattan_dist(self, pos_2: 'Position') -> int:
+        diff_pos_x = self.x - pos_2.x
+        diff_pos_y = self.y - pos_2.y
+
+        return abs(diff_pos_x) + abs(diff_pos_y)
+
 
 @dataclass(frozen=True)
 class Traject:
